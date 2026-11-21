@@ -1,0 +1,52 @@
+{
+ "protocol": 1,
+ "project": "squeeze",
+ "repo": "Bee-ruche/squeezeBee",
+ "branch": "hive",
+ "published": "main",
+ "paused": false,
+ "tasks": "hive/tasks.jsonl",
+ "check": "bee/check",
+ "protected": [
+  "bee/**",
+  "README.md",
+  "DESIGN.md",
+  "LICENSE",
+  ".gitignore"
+ ],
+ "backoff_hours": 0,
+ "members": {
+  "only": [72140],
+  "deals_per_day": 50
+ },
+ "models": [
+  "claude-fable-5-2",
+  "claude-opus-5-5",
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "limits": {
+  "changed_lines": 800,
+  "files": 8,
+  "file_bytes": 262144
+ },
+ "judge": {
+  "kind": "relay",
+  "timeout_seconds": 3600,
+  "metrics": [
+   "total_bytes",
+   "tip_total_bytes",
+   "gain_total_bytes",
+   "sure_total_bytes",
+   "message_bytes",
+   "program_bytes",
+   "encode_seconds",
+   "decode_seconds",
+   "encode_memory_kb",
+   "decode_memory_kb",
+   "builds",
+   "runs"
+  ],
+  "confirm": ["sure_total_bytes"]
+ }
+}

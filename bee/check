@@ -1,0 +1,38 @@
+#!/bin/bash
+# The project's quick check, for a worker, IN THE SANDBOX (bee/README.md): builds the program as the judge does
+# (the same script, the same rule, the same compiler) and takes a slice of the corpus there and back.
+#
+#   bee/check [bytes [file]]      bytes: how much of the file (default 1000000; 0: all of it)
+#                                 file:  the data (default: the project's corpus, bee/corpus/data)
+#
+# It prints the figures the judge counts (the program's bytes, the message's bytes, their total) and the processor
+# time of each phase, on this machine. It ends with 0 only if what comes back is what went in, byte for byte.
+# It proves nothing to the hive: the judge runs each phase alone in a container, twice, on the whole corpus.
+set -euo pipefail
+root="$(cd "$(dirname "$0")/.." && pwd)"
+bytes="${1:-1000000}"
+data="${2:-$root/bee/corpus/data}"
+[ -f "$data" ] || { echo "check: no data at $data" >&2; exit 2; }
+out=/tmp/bee-check
+rm -rf "$out"
+mkdir -p "$out"
+BEE_SRC="$root" BEE_OUT="$out" sh "$root/bee/relay/build"
+if [ "$bytes" = 0 ]; then cp "$data" "$out/data"; else head -c "$bytes" "$data" > "$out/data"; fi
+TIMEFORMAT='%U %S'
+# (The program reads descriptor 3 and writes descriptor 4: here the shell opens them; in the judge, its gate does.)
+encode="$( { time "$out/run" encode 3<"$out/data" 4>"$out/message"; } 2>&1 | tail -n 1)"
+decode="$( { time "$out/run" decode 3<"$out/message" 4>"$out/back"; } 2>&1 | tail -n 1)"
+program="$(wc -c < "$out/run")"
+message="$(wc -c < "$out/message")"
+echo "data_bytes $(wc -c < "$out/data")"
+echo "program_bytes $program"
+echo "message_bytes $message"
+echo "total_bytes $((program + message))"
+echo "encode_seconds (user system) $encode"
+echo "decode_seconds (user system) $decode"
+if cmp -s "$out/data" "$out/back"; then
+  echo "round trip: the same bytes"
+else
+  echo "round trip: NOT the same bytes" >&2
+  exit 1
+fi

@@ -1,0 +1,14 @@
+{
+  "image": "rust",
+  "data": {"path": "bee/corpus/data", "bytes": 10000000, "sha256": "9ff1b7fed5395208b23d20ce67fc5b0b4cf93b384b4dcba6c4c793b8f6868d24"},
+  "skeleton": ["bee/relay/build", "bee/relay/rules.py", "bee/relay/main.rs"],
+  "program": ["src"],
+  "build_seconds": 120,
+  "build_processes": 64,
+  "encode_seconds": 90,
+  "decode_seconds": 90,
+  "memory_mb": 2048,
+  "output_mb": 256,
+  "program_bytes": 1048576,
+  "program_files": 64
+}

@@ -1,0 +1,35 @@
+#!/bin/sh
+# The program's build: « sh /src/bee/relay/build », in a container without network that holds the skeleton (this
+# script, rules.py, main.rs) and one program (src/), and neither the corpus nor another program. It leaves the
+# program as /out/run.  (BEE_SRC and BEE_OUT name other folders than /src and /out: bee/check gives them, the judge
+# does not.)
+#
+# The program is linked statically (crt-static): a phase runs in a container that holds no library and no file of
+# any system, so everything the program needs is in the one file that is counted.
+#
+# What is built: the program's files as one crate without the standard library and without unsafe code, whose root
+# rules.py writes once it has held each file to the project's rule; then the project's own frame (main.rs), which
+# reads one file, calls the crate and writes one file.
+set -eu
+src="${BEE_SRC:-/src}" out="${BEE_OUT:-/out}"
+
+# One compiler: the release the judge's image packages. Another one is the machine's fault, not a program's.
+found=$(rustc --version)
+case "$found" in
+  "rustc 1.75."*) ;;
+  *) echo "build: this project is built with rustc 1.75 (found: $found)" >&2; exit 3 ;;
+esac
+
+# A fixed place beside the output, in the build's own bounded folder (the manifest's output_mb): the same paths at
+# every build, so the same program; the compiler's and the linker's own scratch files go there too.
+work="$out/work"
+rm -rf "$work"
+mkdir -p "$work"
+export TMPDIR="$work"
+python3 "$src/bee/relay/rules.py" "$src/src" "$work/lib.rs"
+common="--edition 2021 -C opt-level=3 -C codegen-units=1 -C panic=abort -C debuginfo=0 -C strip=symbols -C target-feature=+crt-static -C overflow-checks=off -C debug-assertions=off"
+# shellcheck disable=SC2086
+rustc $common -F unsafe_code --crate-type rlib --crate-name program -o "$work/libprogram.rlib" "$work/lib.rs"
+# shellcheck disable=SC2086
+rustc $common --extern program="$work/libprogram.rlib" -o "$out/run" "$src/bee/relay/main.rs"
+rm -rf "$work"
