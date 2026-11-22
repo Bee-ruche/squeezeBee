@@ -79,14 +79,12 @@ of the clone, use the first one your machine allows, and if it allows neither, *
 
 ```bash
 docker build -t bee-squeeze bee/sandbox    # with network; a worker: only right after `hive start` printed `STARTED`, before any project code ran since; anyone else: from a fresh clone
+ro=(.git .github AGENTS.md CLAUDE.md bee hive README.md DESIGN.md LICENSE .gitignore .gitattributes)   # read-only inside (bee/README.md, "The sandbox")
+mounts=(); for p in "${ro[@]}"; do [ -e "$p" ] || continue; mounts+=(--mount "type=bind,source=$PWD/$p,target=/work/$p,readonly"); done
 docker run --rm -it --network none --cap-drop ALL --security-opt no-new-privileges \
   --tmpfs /tmp:rw,exec,nosuid,size=2g \
   --mount type=bind,source="$PWD",target=/work \
-  --mount type=bind,source="$PWD/.git",target=/work/.git,readonly \
-  --mount type=bind,source="$PWD/.github",target=/work/.github,readonly \
-  --mount type=bind,source="$PWD/AGENTS.md",target=/work/AGENTS.md,readonly \
-  --mount type=bind,source="$PWD/CLAUDE.md",target=/work/CLAUDE.md,readonly \
-  --mount type=bind,source="$PWD/bee",target=/work/bee,readonly \
+  "${mounts[@]}" \
   -w /work bee-squeeze bash
 ```
 
@@ -94,7 +92,7 @@ docker run --rm -it --network none --cap-drop ALL --security-opt no-new-privileg
 printed `STARTED`: nothing of the clone runs before that, this launcher included) runs the command at the root of the
 clone with no network, none of your environment variables and an empty home. The clone is writable there but for
 its guarded paths: `.git` (its history only), `.github`, the agents' instructions, `bee/`, `hive/` and the project's
-other protected files are read-only ([bee/README.md](bee/README.md), "The sandbox"). The launcher shows the
+other guarded files are read-only ([bee/README.md](bee/README.md), "The sandbox"). The launcher shows the
 machine's own `/usr`, and the check needs the judge's own toolchain there: `/usr/bin/rustc` 1.75 as Ubuntu 24.04
 packages it, `/usr/bin/cc` (gcc) with the static C library, and `/usr/bin/python3`. On a Linux machine whose `/usr`
 holds them:
@@ -104,7 +102,8 @@ bee/sandbox/sans-docker.sh bee/check      # no network inside
 ```
 
 Where `/usr` does not hold them, `bee/check` says what is missing and stops (exit status 3), and so do you: a check
-made with another toolchain cannot tell you what the judge will answer. Where the machine refuses what the launcher
+made with another toolchain cannot tell you what the judge will answer. Do not run it again in another environment
+(another PATH, other tools): it already takes the judge's tools from `/usr/bin` wherever else the PATH looks first. Where the machine refuses what the launcher
 needs, such as user namespaces, the launcher runs nothing (exit status 125, and the reason): stop too.
 
 In either form: `bee/check` builds the program as the judge does and takes the first million bytes of the corpus there and
