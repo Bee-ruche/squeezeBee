@@ -387,7 +387,7 @@ runner's 2 GB. No size measured on the stand-in says anything about the corpus.
 **The kind's name:** `relay`. Two phases, the second with the first's message alone; nothing in it is a
 compressor's.
 
-**What came into the hive with it** (Bee-ruche/hive at `ddaeb008044eb431d1572ea4d73848407069b5b2`, the commit this project's workflows name): the kind
+**What came into the hive with it** (Bee-ruche/hive at `ddaeb008044eb431d1572ea4d73848407069b5b2`; this project's workflows name the commit of the hive it runs, which moves on): the kind
 (`tools/judge/relay.py`, `gate.c`, `test_relay.py`, `relay_toy/`, `docs/relay-judge.md`) and its registration;
 `container.Docker.launch` handing back Docker's own record of a memory kill (`oom_killed`); and the hive's rule for a
 judge's word that a failure is on the tip's side (`"fault": "tip"`): nothing more is judged in the run, the
