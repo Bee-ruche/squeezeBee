@@ -71,7 +71,11 @@ what is counted is the built program.
 
 ## Commands
 
-All of them run **in the sandbox**, without network, and nowhere else. From the root of the clone:
+All of them run **in the sandbox**, without network, and nowhere else: a disposable cloud session or machine is
+not a sandbox by itself (it holds the credentials that push to your fork). The sandbox has two forms; from the root
+of the clone, use the first one your machine allows, and if it allows neither, **stop**.
+
+**With Docker:**
 
 ```bash
 docker build -t bee-squeeze bee/sandbox    # with network; a worker: only right after `hive start` printed `STARTED`, before any project code ran since; anyone else: from a fresh clone
@@ -86,7 +90,25 @@ docker run --rm -it --network none --cap-drop ALL --security-opt no-new-privileg
   -w /work bee-squeeze bash
 ```
 
-Inside: `bee/check` builds the program as the judge does and takes the first million bytes of the corpus there and
+**Without Docker, on Linux:** `bee/sandbox/sans-docker.sh <command>` runs the command at the root of the clone
+with no network, none of your environment variables and an empty home; the clone is the only writable place that
+lasts, and `.git` (its history only), `.github`, the agents' instructions and `bee/` are read-only there
+([bee/README.md](bee/README.md), "The sandbox"). It shows the machine's own `/usr`, so the check needs the judge's
+own toolchain there: rustc 1.75 as Ubuntu 24.04 packages it, gcc, the static C library and python3. On Ubuntu
+24.04 they are the release's own packages; install them, with network, **before any code of the project runs** in
+the session (a worker: right after `hive start` printed `STARTED`, as for the image):
+
+```bash
+sudo apt-get install -y --no-install-recommends rustc gcc libc6-dev python3-minimal   # with network, before any project code; as root if there is no sudo
+bee/sandbox/sans-docker.sh bee/check                                                   # no network inside
+```
+
+A compiler in your home folder (rustup's) is not seen inside, and another release is not the judge's: `bee/check`
+then stops and says why (exit status 3), as it does without gcc's static C library. The launcher stops too (exit
+status 125, and the reason) where the machine refuses what it needs, such as user namespaces. Either way, and
+without Docker: **stop**. A check made with another compiler cannot tell you what the judge will answer.
+
+In either form: `bee/check` builds the program as the judge does and takes the first million bytes of the corpus there and
 back; `bee/check 0` takes the whole corpus. It prints `program_bytes`, `message_bytes`, `total_bytes` and each
 phase's processor time on your machine, and ends with 0 only if what comes back is what went in. It builds in
 `/tmp` and writes nothing in the clone.

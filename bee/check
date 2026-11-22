@@ -8,11 +8,38 @@
 # It prints the figures the judge counts (the program's bytes, the message's bytes, their total) and the processor
 # time of each phase, on this machine. It ends with 0 only if what comes back is what went in, byte for byte.
 # It proves nothing to the hive: the judge runs each phase alone in a container, twice, on the whole corpus.
+#
+# It checks with the judge's own toolchain or not at all (exit 3, and why): rustc 1.75 as Ubuntu 24.04 packages it,
+# its linker (cc), the static C library it links into the program, python3 for the project's rule. Another compiler
+# would build what the judge's refuses (a later release's language) and weigh the program otherwise (bee/README.md,
+# "The sandbox").
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 bytes="${1:-1000000}"
 data="${2:-$root/bee/corpus/data}"
 [ -f "$data" ] || { echo "check: no data at $data" >&2; exit 2; }
+missing=()
+compiler="$(rustc --version 2>/dev/null || true)"
+case "$compiler" in
+  "rustc 1.75."*) ;;
+  "") missing+=("no rustc (a compiler in your home folder is not seen in the sandbox without Docker)") ;;
+  *) missing+=("$compiler, where the judge's is rustc 1.75") ;;
+esac
+if ! command -v cc >/dev/null; then
+  missing+=("no cc, the linker rustc calls (gcc)")
+elif [ ! -f "$(cc -print-file-name=libc.a 2>/dev/null)" ]; then
+  missing+=("no static C library (libc.a, Ubuntu's libc6-dev), which the judge links into the program")
+fi
+command -v python3 >/dev/null || missing+=("no python3, which runs the project's rule (bee/relay/rules.py)")
+if [ ${#missing[@]} -gt 0 ]; then
+  printf 'check: %s\n' "${missing[@]}" >&2
+  echo "check: without the judge's own toolchain this check cannot say what the judge will: it stops. On Ubuntu 24.04:" \
+       "its packages rustc gcc libc6-dev python3-minimal, installed before any code of the project runs; or the" \
+       "sandbox's Docker form (AGENTS.md, \"Commands\")." >&2
+  exit 3
+fi
+echo "compiler $compiler"
+[ "$(uname -m)" = x86_64 ] || echo "note: an $(uname -m) program: program_bytes is not the judge's (x86-64); message_bytes is"
 out=/tmp/bee-check
 rm -rf "$out"
 mkdir -p "$out"
