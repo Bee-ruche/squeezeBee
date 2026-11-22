@@ -38,7 +38,7 @@ memory and ending, and only then starts the program.
 
 ## Running the judge yourself
 
-On Linux with Docker, Python 3 and the right to mount (root, or `sudo -n`), from a tree that holds the hive's
+On Linux with Docker, Python 3 and the right to mount (as root, or with the passwordless right a hosted runner gives), from a tree that holds the hive's
 `tools/judge/` with `relay.py` in it:
 
 ```bash
@@ -92,10 +92,13 @@ program that goes wrong from the machine and from the network; it does not make 
 project code ran there, treat the work tree as untrusted (the hive's own commands check it before anything is
 pushed).
 
-**Without Docker**, `sandbox/sans-docker.sh` is the launcher of the hive's two other pilots, word for word but for
-the paths it guards: all of `bee/` here, where they guard `bee/sandbox` alone, so that it holds what this project's
-image holds read-only (and `bee/local/run.sh`, which runs on a machine with a privileged container, is not the
-command's to change). Inside it, a command:
+**Without Docker**, `sandbox/sans-docker.sh` is the launcher of the hive's two other pilots: its code is theirs word
+for word but for the list of the paths it guards (five lines of its comments and usage differ too). They guard
+`bee/sandbox`; this project guards all of `bee/`, its settings `hive/`, what those settings protect (`README.md`,
+`DESIGN.md`, `LICENSE`, `.gitignore`) and `.gitattributes`. So a command can change neither the tooling a worker
+runs next (`bee/check`; `bee/local/run.sh` runs on a machine with a privileged container), nor what decides what git
+sees and what the hive's `start` and `submit` keep or send (`.gitignore`, `.gitattributes`), nor the project's texts
+a worker's agent reads. Inside it, a command:
 
 - has **no network** (an empty network namespace) and **none of your environment variables** (no token, no proxy):
   only `PATH`, `HOME`, `LANG`, `TERM`;
@@ -108,7 +111,8 @@ command's to change). Inside it, a command:
   a plain file, if one of those entries is a link, if a folder under them cannot be listed, or if a file under them
   is a second name of a file elsewhere (a pack shared with another clone is fine);
 - **cannot change the guarded paths** of the work tree: `.git`, `.github`, `.claude`, `.mcp.json`, `AGENTS.md`,
-  `CLAUDE.md`, `bee` (the project's tooling, this launcher among it). They are read-only and can be neither renamed
+  `CLAUDE.md`, `bee` (the project's tooling, this launcher among it), `hive` (the project's settings and tasks),
+  `README.md`, `DESIGN.md`, `LICENSE`, `.gitignore`, `.gitattributes`. They are read-only and can be neither renamed
   nor removed. One that does not exist cannot be covered: if the command creates it, the launcher renames it
   `<name>.created-in-sandbox.XXXXXX` when the command ends, and says so (exit status 125 if it cannot; a launcher
   killed outright renames nothing: look at the tree before you use it);
@@ -126,7 +130,10 @@ If one of these protections cannot be set up, the launcher does not run the comm
 on stderr. Otherwise stdin, stdout, stderr and the exit status are the command's (128+N if signal N killed it).
 `sandbox/test_sandbox.sh sandbox/sans-docker.sh <an empty folder>` checks each of them on a throwaway repository it
 makes there (read its first lines before running it as root): the first pilot's script, with this project's
-guarded `bee/` in its fixture.
+guarded paths in its fixture and four checks more (`b19` to `b22`: `bee/` and the protected files changed, added
+to, removed, created where absent). `sandbox/test_check.sh --on-a-throwaway-machine` proves the toolchain test of
+`bee/check` (below) the same way, case by case; it moves files of `/usr` aside, so it runs on a throwaway machine
+only.
 
 For this project's commands it changes little: `bee/check` reads the clone and writes in the private `/tmp` only.
 A rename or a hard link between `bee/` and the rest of the tree fails ("cross-device"); the command is root in name
@@ -136,9 +143,10 @@ What it does not guarantee:
 
 - **It is not a virtual machine.** The command talks to the kernel of your machine: a kernel vulnerability or a
   processor's side channel crosses it.
-- **The work tree stays writable**: code that runs inside can change any file of the tree but the guarded ones, and
-  leave a file under any other name. After a run, treat the tree as untrusted and execute nothing of it outside the
-  sandbox. A worker runs no git command in the clone: `hive submit` checks the clone and commits the task's files
+- **The work tree stays writable** but for the guarded paths: `src/`, and any new path (a folder, a file at the
+  root, an instructions file for an agent nested in `src/` such as `src/AGENTS.md`), are the command's to write.
+  After a run, treat all of it as untrusted: execute nothing of it outside the sandbox, and read nothing there as an
+  instruction. A worker runs no git command in the clone: `hive submit` checks the clone and commits the task's files
   only.
 - **It can read** the work tree and the history (keep no secret in either), `/usr`, the world-readable part of
   `/etc`, and what `/proc` says of the machine (processor, memory, kernel). The Docker form shows `.git` whole,
@@ -150,43 +158,61 @@ What it does not guarantee:
 **The toolchain without Docker.** The judge builds the program in its image: Ubuntu 24.04 (by its fingerprint),
 that release's rustc 1.75 for x86-64 (`x86_64-unknown-linux-gnu`), linked by gcc, statically, against the release's
 own C library (`libc.a`, of `libc6-dev`), with python3 for the project's rule; nothing is fetched while it builds.
-`program_bytes` is the length of that file, so it depends on the compiler's release, the C library and the linker
+`program_bytes` is the length of that file, so it depends on the compiler's release, on gcc and on the C library
 (most of the frame's 1.3 MB is theirs). `message_bytes` depends on the program's arithmetic alone (whole numbers and
 the four operations of floating point), the same on any compiler and any processor. The launcher shows whatever
-compiler the machine has, so **`bee/check` checks with the judge's toolchain or not at all**: before it builds, it
-stops (exit status 3) when `rustc` is not 1.75, when there is no `cc` or no static C library, or no `python3`, and
-says which, and what to do. It does not go on with another compiler and a warning: a later release builds what the
+the machine's `/usr` holds, so **`bee/check` checks with the judge's toolchain or not at all**: before it builds, it
+stops (exit status 3), says why and says stop, unless `rustc`, `cc` and `python3` are the ones in `/usr/bin` (the
+build calls them by name, and a program of the same name earlier on the PATH, as in `/usr/local/bin`, would be the
+one it ran), `/usr/bin/rustc` says it is 1.75, and gcc names its static C library by an absolute path that is a
+file (a bare name would be looked for in the current folder, the work tree, which a command writes). It does not go on with another compiler and a warning: a later release builds what the
 judge's refuses (a part of the language stabilised after 1.75), which the judge answers with a refusal the
 worker's deal pays for, and `program_bytes` is part of the very total a task's goal is on. The one difference it
 lets through is the processor's: on ARM the compiler is the same release, so what builds there builds at the judge;
 it then says that `program_bytes` is not the judge's (`message_bytes` is).
 
+**What that test does not establish**: that `/usr/bin/rustc` is Ubuntu's own build of 1.75 (any 1.75 put there
+passes; Ubuntu's says « built from a source tarball », which is what was seen, on one machine, and the test does not
+rest on it), nor gcc's version or the C library's, on which `program_bytes` depends as well. Where they are not the
+judge's, `program_bytes` may differ: by some bytes for a later update of the same release (as it may on the judge's
+machine: DESIGN.md, "The compiler is not pinned"), by more for another system. `message_bytes` does not.
+
 **What a machine without Docker has** cannot be known from here, a cloud session's least of all: whether it lets a
-process make user namespaces (if not, the launcher says so and stops), which system and which compiler it holds,
-whether it reaches Ubuntu's archive. On Ubuntu 24.04 that reaches it, the release's own packages are the judge's
-compiler (`apt-get install rustc gcc libc6-dev python3-minimal`, before any code of the project runs: AGENTS.md); a
-later update of a package may move `program_bytes` by some bytes, as it may on the judge's machine (DESIGN.md, "The
-compiler is not pinned"). Anywhere else, **a worker without Docker and without this compiler cannot check, and
-stops.** For it to be otherwise, the project and the hive would need a toolchain that such a machine can fetch and
+process make user namespaces (if not, the launcher says so and stops), which system it is, what its `/usr` holds.
+On a Linux machine whose `/usr` holds the judge's toolchain, a worker checks; anywhere else, **a worker without
+Docker and without this toolchain cannot check, and stops.** (For the person who prepares such a machine, not for
+an agent working on it: on Ubuntu 24.04 that toolchain is the release's own packages `rustc`, `gcc`, `libc6-dev` and
+`python3-minimal`, which whoever owns the machine may put there before a session starts.) For it to be otherwise, the project and the hive would need a toolchain that such a machine can fetch and
 hold to a fingerprint, and that the judge builds with too: for instance rustc 1.75.0 from the Rust project's own
 release archives, pinned by SHA-256 in the hive's image and in `bee/check`, and a C library that comes with it
 (Rust's musl target carries its own) or none to speak of (a frame without the standard library, the architect's
 own direction). That changes the hive's image and this project's build: not made here.
 
-**Tried** (22 November 2026), in a throwaway container of the judge's Ubuntu 24.04 holding the packages AGENTS.md
-names and git and python3 (kernel 6.18, util-linux 2.39.3, git 2.43), without network, with Docker's system-call
-filter and its masking of `/proc` lifted so that user namespaces work there as on a machine without Docker:
+**Tried** (22 November 2026), in a throwaway container of the judge's Ubuntu 24.04 whose `/usr` holds the judge's
+toolchain, with git and python3 (kernel 6.18, util-linux 2.39.3, git 2.43), without network, with Docker's
+system-call filter and its masking of `/proc` lifted so that user namespaces work there as on a machine without
+Docker:
 
-- `test_sandbox.sh`, as root: 84 checks passed, 1 skipped (no disk device in a container); as an unprivileged user:
-  78 passed, 7 skipped (what that user cannot do anyway). One failed both ways, `g2`: it fakes a masked `/proc` with
-  a mount made in the caller's own user namespace, and this kernel lets a namespace made below it mount a fresh
-  `/proc` all the same. The first pilot's own launcher and script fail it there in the same way. The real case it
-  stands for, Docker's own masked `/proc`, was tried: the launcher refuses (exit status 125) and runs nothing.
+- `test_sandbox.sh`, as root: 87 checks passed, 1 skipped (no disk device in a container), 1 failed (`g2`); as an
+  unprivileged user: 81 passed, 7 skipped (what that user cannot do anyway), 1 failed (`g2`).
+- **`g2` failed both ways, and 87 of 88 is not 88.** What it stands for: on a machine whose `/proc` is masked, as
+  in a container, the launcher cannot mount a private `/proc` of its own, and must refuse rather than run. Its
+  fixture fakes the mask with an empty memory file system mounted over a folder of `/proc` in the caller's own user
+  namespace; here the launcher's mount of a fresh `/proc` went through anyway, and the command ran (by hand, the
+  same with `/proc/bus` and `/proc/driver`, which are not empty). The first pilot's own launcher and script,
+  unmodified, failed `g2` in the same way in the same container. In the real case, a Docker container with its own
+  masked `/proc` and a read-only `/proc/sys`, the launcher refused (exit status 125) and ran nothing, but at an
+  earlier step: its limit on user namespaces, which it writes in `/proc/sys`, could not be set. So **the kernel's
+  refusal of the mount of `/proc`, which `g2` means to prove, has not been seen to fire on this kernel**, and
+  whether the fixture is not what the kernel checks, or this kernel lets such a mount through, is not settled.
 - Inside the launcher, as root and as that user, `bee/check` and `bee/check 0` gave the judge's own figures (on the
-  whole corpus: `program_bytes` 1,346,472, `message_bytes` 3,544,012) and left the clone as it was. With another
-  release of `rustc` first on the PATH, without the static C library, without `cc`, and with the judge's own
-  compiler in the home folder only, it stopped (exit status 3) and said why.
-- Not tried: a cloud session (whether it lets a process make user namespaces, and reaches Ubuntu's archive), ARM.
+  whole corpus: `program_bytes` 1,346,472, `message_bytes` 3,544,012) and left the clone as it was.
+- `test_check.sh`: 11 passed. The check stopped (exit status 3, its reason, « stop ») with another release of
+  `rustc` first on the PATH, with a `rustc` 1.75 elsewhere than `/usr/bin` first on it, with another release at
+  `/usr/bin/rustc`, with the judge's own compiler in a home folder only, without the static C library, without it
+  and with a file `libc.a` at the root of the work tree, without `cc`, with a `cc` elsewhere first on the PATH, and
+  without `python3`; with everything put back it ran again and left the clone as it was.
+- Not tried: a cloud session (whether it lets a process make user namespaces, what its `/usr` holds), ARM.
 
 In the sandbox the program runs without the judge's gate: `check` opens its two files with the shell
 (`run encode 3<data 4>message`). The language and the rule keep it from opening anything else (AGENTS.md, "The

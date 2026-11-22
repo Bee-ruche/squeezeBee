@@ -90,23 +90,22 @@ docker run --rm -it --network none --cap-drop ALL --security-opt no-new-privileg
   -w /work bee-squeeze bash
 ```
 
-**Without Docker, on Linux:** `bee/sandbox/sans-docker.sh <command>` runs the command at the root of the clone
-with no network, none of your environment variables and an empty home; the clone is the only writable place that
-lasts, and `.git` (its history only), `.github`, the agents' instructions and `bee/` are read-only there
-([bee/README.md](bee/README.md), "The sandbox"). It shows the machine's own `/usr`, so the check needs the judge's
-own toolchain there: rustc 1.75 as Ubuntu 24.04 packages it, gcc, the static C library and python3. On Ubuntu
-24.04 they are the release's own packages; install them, with network, **before any code of the project runs** in
-the session (a worker: right after `hive start` printed `STARTED`, as for the image):
+**Without Docker, on Linux:** `bee/sandbox/sans-docker.sh <command>` (a worker runs it only once `hive start` has
+printed `STARTED`: nothing of the clone runs before that, this launcher included) runs the command at the root of the
+clone with no network, none of your environment variables and an empty home. The clone is writable there but for
+its guarded paths: `.git` (its history only), `.github`, the agents' instructions, `bee/`, `hive/` and the project's
+other protected files are read-only ([bee/README.md](bee/README.md), "The sandbox"). The launcher shows the
+machine's own `/usr`, and the check needs the judge's own toolchain there: `/usr/bin/rustc` 1.75 as Ubuntu 24.04
+packages it, `/usr/bin/cc` (gcc) with the static C library, and `/usr/bin/python3`. On a Linux machine whose `/usr`
+holds them:
 
 ```bash
-sudo apt-get install -y --no-install-recommends rustc gcc libc6-dev python3-minimal   # with network, before any project code; as root if there is no sudo
-bee/sandbox/sans-docker.sh bee/check                                                   # no network inside
+bee/sandbox/sans-docker.sh bee/check      # no network inside
 ```
 
-A compiler in your home folder (rustup's) is not seen inside, and another release is not the judge's: `bee/check`
-then stops and says why (exit status 3), as it does without gcc's static C library. The launcher stops too (exit
-status 125, and the reason) where the machine refuses what it needs, such as user namespaces. Either way, and
-without Docker: **stop**. A check made with another compiler cannot tell you what the judge will answer.
+Where `/usr` does not hold them, `bee/check` says what is missing and stops (exit status 3), and so do you: a check
+made with another toolchain cannot tell you what the judge will answer. Where the machine refuses what the launcher
+needs, such as user namespaces, the launcher runs nothing (exit status 125, and the reason): stop too.
 
 In either form: `bee/check` builds the program as the judge does and takes the first million bytes of the corpus there and
 back; `bee/check 0` takes the whole corpus. It prints `program_bytes`, `message_bytes`, `total_bytes` and each
@@ -117,14 +116,19 @@ phase's processor time on your machine, and ends with 0 only if what comes back 
 meets the gate's filter on system calls, its shut time counter, or the judge's own processor. So:
 
 - **its time figures are not the judge's**, anywhere: another processor, other neighbours;
-- **on an ARM machine** (the sandbox's image and its compiler exist for both; not tried), `program_bytes` is an ARM
-  program's, not the x86-64 one the judge counts; `message_bytes` should be the judge's own (the program computes
-  with whole numbers and the four operations of floating point, which give the same results everywhere);
+- **on an ARM machine** (the image and its compiler exist for both; not tried), `bee/check` runs with the same
+  compiler release and says that its `program_bytes` is an ARM program's, not the x86-64 one the judge counts. What
+  you can rely on there: `message_bytes`, which is the judge's own (the program computes with whole numbers and the
+  four operations of floating point, which give the same results everywhere), and so the message's share of a
+  change's gain; a change's `program_bytes` against the tip's, both built on that machine, only as an estimate of
+  what the judge will count;
 - **a program that reads the processor's counter or a fine clock, or makes a system call the gate refuses, passes
   `bee/check` and dies at the judge**, on x86-64 as on ARM. (The project's rule already keeps the program from any
   clock and any call; this matters only if that rule were got round.)
 
-Compare a change against the tip on the same machine, and take the program's size from the judge's lines.
+Compare a change against the tip built on the same machine. On x86-64 with the judge's toolchain, `program_bytes`
+is the judge's own (it was, to the byte, where this was tried); the tip's figures on the hive's machine are on
+each accepted verdict's line.
 
 ## Submitting
 

@@ -43,6 +43,8 @@ fixture() {
   cp "$launcher" "$repo/bee/sandbox/sans-docker.sh"; chmod +x "$repo/bee/sandbox/sans-docker.sh"
   echo "tracked" >"$repo/file.txt"; echo "# agents" >"$repo/AGENTS.md"; echo "# claude" >"$repo/CLAUDE.md"
   printf '#!/bin/sh\necho the project check\n' >"$repo/bee/check"; chmod +x "$repo/bee/check"
+  echo "# readme" >"$repo/README.md"; echo "# design" >"$repo/DESIGN.md"; echo "the licence" >"$repo/LICENSE"
+  echo "/target/" >"$repo/.gitignore"; mkdir -p "$repo/hive"; echo '{"project": "fixture"}' >"$repo/hive/project.json"
   echo "on: push" >"$repo/.github/workflows/ci.yml"
   ln -s "$outside/target.txt" "$repo/link-to-file"; ln -s "$outside/dir" "$repo/link-to-dir"
   ln -s ../registre/tools/hive/hive.py "$repo/link-to-sibling"
@@ -176,6 +178,15 @@ refused b12 "the launcher itself (bee/sandbox/sans-docker.sh) cannot be changed"
 tooling=$(digest "$repo/bee")
 inside 'echo "echo planted" >>bee/check; echo x >bee/planted; mkdir bee/construction; rm -f bee/check; mv bee/check bee/check-moved'
 verdict b19 "the project's tooling (bee/: bee/check) can be neither changed, added to, nor removed" "$([ "$rc" -ne 0 ] && [ "$(digest "$repo/bee")" = "$tooling" ]; echo $?)" "bee/ on the host: $(ls -A "$repo/bee" | tr '\n' ' ')"
+protected() { (cd "$repo" && tar -cf - README.md DESIGN.md LICENSE .gitignore hive 2>/dev/null | sha256sum); }
+protected_before=$(protected)
+inside 'echo planted >>README.md; echo planted >>DESIGN.md; echo planted >>LICENSE; echo "*" >>.gitignore; echo "{}" >hive/project.json; echo x >hive/planted'
+verdict b20 "what the project's settings protect, and the settings (README.md, DESIGN.md, LICENSE, .gitignore, hive/), cannot be changed or added to" "$([ "$rc" -ne 0 ] && [ "$(protected)" = "$protected_before" ]; echo $?)" "changed on the host"
+inside 'rm -f README.md DESIGN.md LICENSE .gitignore hive/project.json; rm -rf hive; mv hive hive-moved; mv README.md README-moved'
+verdict b21 "nor removed, nor renamed" "$([ "$rc" -ne 0 ] && [ "$(protected)" = "$protected_before" ]; echo $?)" "on the host: $(cd "$repo" && ls -A | tr '\n' ' ')"
+[ ! -e "$repo/hive-moved" ] || mv -T "$repo/hive-moved" "$repo/hive"; [ ! -e "$repo/README-moved" ] || mv -T "$repo/README-moved" "$repo/README.md"   # put the fixture back
+inside 'printf "* -text\n" >.gitattributes'
+verdict b22 "a .gitattributes created where there was none is not there afterwards, and the launcher says so" "$([ ! -e "$repo/.gitattributes" ] && grep -q "created .gitattributes: set aside" <<<"$out"; echo $?)" "rc $rc; on the host: $(cd "$repo" && ls -d .gitattributes* 2>/dev/null | tr '\n' ' ')"
 inside 'mv bee bee-moved && mkdir -p bee/sandbox && echo "echo planted" >bee/sandbox/sans-docker.sh'
 verdict b13 "nor replaced by renaming the folder above it" "$([ "$rc" -ne 0 ] && [ "$(digest "$repo/bee/sandbox")" = "$before" ]; echo $?)" "bee/sandbox on the host: $(ls "$repo/bee/sandbox" 2>&1 | tr '\n' ' ')"
 [ -d "$repo/bee-moved" ] && { mv "$repo/bee" "$repo/bee-planted"; mv "$repo/bee-moved" "$repo/bee"; }   # put the fixture back
