@@ -87,6 +87,12 @@ docker run --rm -it --network none --cap-drop ALL --security-opt no-new-privileg
   --mount type=bind,source="$PWD/AGENTS.md",target=/work/AGENTS.md,readonly \
   --mount type=bind,source="$PWD/CLAUDE.md",target=/work/CLAUDE.md,readonly \
   --mount type=bind,source="$PWD/bee",target=/work/bee,readonly \
+  --mount type=bind,source="$PWD/hive",target=/work/hive,readonly \
+  --mount type=bind,source="$PWD/README.md",target=/work/README.md,readonly \
+  --mount type=bind,source="$PWD/DESIGN.md",target=/work/DESIGN.md,readonly \
+  --mount type=bind,source="$PWD/LICENSE",target=/work/LICENSE,readonly \
+  --mount type=bind,source="$PWD/.gitignore",target=/work/.gitignore,readonly \
+  --mount type=bind,source="$PWD/.gitattributes",target=/work/.gitattributes,readonly \
   -w /work bee-squeeze bash
 ```
 
@@ -94,7 +100,7 @@ docker run --rm -it --network none --cap-drop ALL --security-opt no-new-privileg
 printed `STARTED`: nothing of the clone runs before that, this launcher included) runs the command at the root of the
 clone with no network, none of your environment variables and an empty home. The clone is writable there but for
 its guarded paths: `.git` (its history only), `.github`, the agents' instructions, `bee/`, `hive/` and the project's
-other protected files are read-only ([bee/README.md](bee/README.md), "The sandbox"). The launcher shows the
+other guarded files are read-only ([bee/README.md](bee/README.md), "The sandbox"). The launcher shows the
 machine's own `/usr`, and the check needs the judge's own toolchain there: `/usr/bin/rustc` 1.75 as Ubuntu 24.04
 packages it, `/usr/bin/cc` (gcc) with the static C library, and `/usr/bin/python3`. On a Linux machine whose `/usr`
 holds them:

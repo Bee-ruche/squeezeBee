@@ -87,7 +87,10 @@ Two forms, whose commands AGENTS.md gives ("Commands"): the image (`sandbox/Dock
 Docker, and `sandbox/sans-docker.sh <command>` on Linux where it has not. Where neither works, a worker stops.
 
 **The image** is a container without network, without capability, as an unprivileged user, that sees the clone and
-nothing else of the machine, with `.git`, `.github`, the agents' instructions and `bee/` read-only. It keeps a
+nothing else of the machine, with the launcher's guarded paths that the clone holds read-only: `.git`, `.github`,
+the agents' instructions, `bee/`, `hive/`, `README.md`, `DESIGN.md`, `LICENSE`, `.gitignore`, `.gitattributes`.
+Docker mounts only what exists: a `.claude` or a `.mcp.json` that a command creates there stays where it is, where
+the launcher sets it aside. It keeps a
 program that goes wrong from the machine and from the network; it does not make the clone trustworthy again: after
 project code ran there, treat the work tree as untrusted (the hive's own commands check it before anything is
 pushed).
@@ -129,11 +132,12 @@ a worker's agent reads. Inside it, a command:
 If one of these protections cannot be set up, the launcher does not run the command: exit status 125 and the reason
 on stderr. Otherwise stdin, stdout, stderr and the exit status are the command's (128+N if signal N killed it).
 `sandbox/test_sandbox.sh sandbox/sans-docker.sh <an empty folder>` checks each of them on a throwaway repository it
-makes there (read its first lines before running it as root): the first pilot's script, with this project's
+makes there (never for a worker, never on a machine that is not a throwaway; read its first lines before running
+it as root): the first pilot's script, with this project's
 guarded paths in its fixture and four checks more (`b19` to `b22`: `bee/` and the protected files changed, added
 to, removed, created where absent). `sandbox/test_check.sh --on-a-throwaway-machine` proves the toolchain test of
-`bee/check` (below) the same way, case by case; it moves files of `/usr` aside, so it runs on a throwaway machine
-only.
+`bee/check` (below) the same way, case by case: never for a worker, never on a machine that is not a throwaway (it
+moves files of `/usr` aside, as root).
 
 For this project's commands it changes little: `bee/check` reads the clone and writes in the private `/tmp` only.
 A rename or a hard link between `bee/` and the rest of the tree fails ("cross-device"); the command is root in name
@@ -207,11 +211,14 @@ Docker:
   whether the fixture is not what the kernel checks, or this kernel lets such a mount through, is not settled.
 - Inside the launcher, as root and as that user, `bee/check` and `bee/check 0` gave the judge's own figures (on the
   whole corpus: `program_bytes` 1,346,472, `message_bytes` 3,544,012) and left the clone as it was.
-- `test_check.sh`: 11 passed. The check stopped (exit status 3, its reason, « stop ») with another release of
+- `test_check.sh`: 12 passed. The check stopped (exit status 3, its reason, « stop ») with another release of
   `rustc` first on the PATH, with a `rustc` 1.75 elsewhere than `/usr/bin` first on it, with another release at
-  `/usr/bin/rustc`, with the judge's own compiler in a home folder only, without the static C library, without it
+  `/usr/bin/rustc`, with the judge's own compiler in a home folder only (shown to run there, from the caller's
+  PATH, outside the launcher), without the static C library, without it
   and with a file `libc.a` at the root of the work tree, without `cc`, with a `cc` elsewhere first on the PATH, and
   without `python3`; with everything put back it ran again and left the clone as it was.
+- The Docker form, as AGENTS.md gives it, in the image of `sandbox/Dockerfile`: `bee/check` ran (as uid 1000), each
+  of its read-only paths refused a write, and a file of the program took one.
 - Not tried: a cloud session (whether it lets a process make user namespaces, what its `/usr` holds), ARM.
 
 In the sandbox the program runs without the judge's gate: `check` opens its two files with the shell

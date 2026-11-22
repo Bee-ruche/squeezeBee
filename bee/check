@@ -20,6 +20,10 @@ bytes="${1:-1000000}"
 data="${2:-$root/bee/corpus/data}"
 [ -f "$data" ] || { echo "check: no data at $data" >&2; exit 2; }
 missing=()
+# By name, as the build calls it: the first one on the PATH. Both forms of the sandbox set a PATH where /usr/bin comes
+# before /bin (the launcher's own, /usr/local/bin:/usr/bin:/bin; the image's, Ubuntu's default), so on a machine whose
+# /bin is /usr/bin (merged /usr) the answer there is /usr/bin/<name>. Run with /bin first, outside both forms, this
+# refuses where it need not: the side of caution, and this check is not run outside them.
 where() { command -v "$1" 2>/dev/null || echo none; }
 compiler=
 if [ "$(where rustc)" != /usr/bin/rustc ]; then

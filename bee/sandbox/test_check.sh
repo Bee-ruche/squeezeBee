@@ -50,8 +50,12 @@ stand_in /usr/local/bin/rustc 'exec /usr/bin/rustc "$@"'
 stops t2 "a rustc 1.75 elsewhere than /usr/bin, first on the PATH: stop" "/usr/local/bin/rustc, where the judge's is /usr/bin/rustc"
 put_aside /usr/bin/rustc; stand_in /usr/bin/rustc 'echo "rustc 1.80.0 (a stand-in)"'
 stops t3 "/usr/bin/rustc of another release: stop" "where the judge's is rustc 1.75"
-real=$(readlink -f /usr/bin/rustc); put_aside /usr/bin/rustc; mkdir -p /root/.cargo-bee-test/bin; ln -s "$real.bee-test-aside" /root/.cargo-bee-test/bin/rustc
-stops t4 "no rustc in /usr, the judge's own one in a home folder and first on the caller's PATH: stop" "rustc: none" "/root/.cargo-bee-test/bin:$PATH"
+# The judge's own rustc, moved out of /usr and named from root's home folder, first on the caller's PATH: outside it
+# runs (t4a, the case's setting), inside it is not seen, since the launcher sets its own PATH and shows no home (t4).
+put_aside /usr/bin/rustc; mkdir -p /root/.cargo-bee-test/bin; ln -s /usr/bin/rustc.bee-test-aside /root/.cargo-bee-test/bin/rustc
+home_rustc=$(PATH=/root/.cargo-bee-test/bin:$PATH rustc --version 2>&1)
+verdict t4a "(t4's setting) outside, the caller's PATH finds a working rustc 1.75 in a home folder, and none is in /usr" "$(case "$home_rustc" in "rustc 1.75."*) [ ! -e /usr/bin/rustc ]; echo $?;; *) echo 1;; esac)" "$home_rustc"
+stops t4 "that rustc is not seen inside (the launcher's own PATH, no home shown): no rustc, stop" "rustc: none" "/root/.cargo-bee-test/bin:$PATH"
 put_aside "$libc"
 stops t5 "no static C library: stop" "no static C library"
 put_aside "$libc"; echo "a libc.a a candidate left" >"$repo/libc.a"; made+=("$repo/libc.a")
