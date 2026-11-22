@@ -11,6 +11,11 @@
 # rules.py writes once it has held each file to the project's rule; then the project's own frame (main.rs), which
 # reads one file, calls the crate and writes one file.
 set -eu
+# The judge's tools, by where they are: rustc, cc (with the assembler and the linker gcc calls through the PATH) and
+# python3 of /usr/bin, whatever another folder of a caller's PATH holds. (In the judge's image nothing comes before
+# them; bee/check sets the same PATH before it calls this.)
+PATH=/usr/bin:/bin
+export PATH
 src="${BEE_SRC:-/src}" out="${BEE_OUT:-/out}"
 
 # One compiler: the release the judge's image packages. Another one is the machine's fault, not a program's.

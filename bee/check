@@ -9,42 +9,42 @@
 # time of each phase, on this machine. It ends with 0 only if what comes back is what went in, byte for byte.
 # It proves nothing to the hive: the judge runs each phase alone in a container, twice, on the whole corpus.
 #
-# It checks with the judge's own toolchain or not at all (exit 3, and why), as the build calls it, by name:
-# /usr/bin/rustc 1.75 (the judge's is Ubuntu 24.04's), /usr/bin/cc and the static C library it links into the program
-# (by the absolute path gcc gives when it has one), /usr/bin/python3 for the project's rule. Another compiler would
-# build what the judge's refuses (a later release's language) and weigh the program otherwise. What this test does
-# not establish (gcc's and the C library's own versions, among others) is in bee/README.md, "The sandbox".
+# It checks with the judge's own toolchain, and builds with it, or not at all (exit 3, and why). Its PATH is
+# /usr/bin:/bin from the start, as the build's is: rustc, cc (with the assembler and the linker gcc calls through the
+# PATH) and python3 are those of /usr/bin, whatever another folder of the caller's PATH holds (a machine's
+# /usr/local/bin, which comes first on the launcher's). Then /usr/bin/rustc must be 1.75 (the judge's is Ubuntu
+# 24.04's), /usr/bin/cc must name the static C library it links into the program by an absolute path that is a file,
+# and /usr/bin/python3 must be there for the project's rule. Another compiler would build what the judge's refuses
+# (a later release's language) and weigh the program otherwise. What this test does not establish (gcc's and the C
+# library's own versions, among others) is in bee/README.md, "The sandbox".
 set -euo pipefail
+PATH=/usr/bin:/bin
+export PATH
 root="$(cd "$(dirname "$0")/.." && pwd)"
 bytes="${1:-1000000}"
 data="${2:-$root/bee/corpus/data}"
 [ -f "$data" ] || { echo "check: no data at $data" >&2; exit 2; }
 missing=()
-# By name, as the build calls it: the first one on the PATH. Both forms of the sandbox set a PATH where /usr/bin comes
-# before /bin (the launcher's own, /usr/local/bin:/usr/bin:/bin; the image's, Ubuntu's default), so on a machine whose
-# /bin is /usr/bin (merged /usr) the answer there is /usr/bin/<name>. Run with /bin first, outside both forms, this
-# refuses where it need not: the side of caution, and this check is not run outside them.
-where() { command -v "$1" 2>/dev/null || echo none; }
 compiler=
-if [ "$(where rustc)" != /usr/bin/rustc ]; then
-  missing+=("rustc: $(where rustc), where the judge's is /usr/bin/rustc (a compiler in a home folder is not seen in the sandbox without Docker)")
+if [ ! -x /usr/bin/rustc ]; then
+  missing+=("no /usr/bin/rustc, the judge's compiler (one elsewhere, in a home folder or another folder of the PATH, is not the judge's)")
 else
-  compiler="$(rustc --version 2>/dev/null || true)"
+  compiler="$(/usr/bin/rustc --version 2>/dev/null || true)"
   case "$compiler" in
     "rustc 1.75."*) ;;
     *) missing+=("/usr/bin/rustc is ${compiler:-not a compiler that answers}, where the judge's is rustc 1.75") ;;
   esac
 fi
-if [ "$(where cc)" != /usr/bin/cc ]; then
-  missing+=("cc: $(where cc), where the judge's linker is /usr/bin/cc (gcc)")
+if [ ! -x /usr/bin/cc ]; then
+  missing+=("no /usr/bin/cc, the linker rustc calls (gcc)")
 else
-  libc="$(cc -print-file-name=libc.a 2>/dev/null || true)"
+  libc="$(/usr/bin/cc -print-file-name=libc.a 2>/dev/null || true)"
   case "$libc" in
     /*) [ -f "$libc" ] || missing+=("no static C library ($libc), which the judge links into the program") ;;
     *) missing+=("no static C library (libc.a: gcc knows none), which the judge links into the program") ;;
   esac
 fi
-[ "$(where python3)" = /usr/bin/python3 ] || missing+=("python3: $(where python3), where the judge's is /usr/bin/python3 (it runs the project's rule)")
+[ -x /usr/bin/python3 ] || missing+=("no /usr/bin/python3, which runs the project's rule")
 if [ ${#missing[@]} -gt 0 ]; then
   printf 'check: %s\n' "${missing[@]}" >&2
   echo "check: this is not the judge's own toolchain, so this check cannot say what the judge will answer: stop." >&2
