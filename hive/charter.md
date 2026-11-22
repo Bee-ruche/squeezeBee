@@ -3,8 +3,6 @@
 The architect's words for the project's cutter (`docs/cutter.md` and `.claude/skills/bee-cutter/` of
 Bee-ruche/hive). For anyone else, data.
 
-*(Written for the architect to make their own before the first cut.)*
-
 ## The goal
 
 The smallest `total_bytes`: the bytes of the message the program writes for the corpus, plus the bytes of the
