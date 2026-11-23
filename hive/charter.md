@@ -21,6 +21,13 @@ figure is exact, so a step that small is still certain, and a candidate that is 
 The floor was 0.0025 until 23 November 2026. The first probes measured ideas between a loss of 0.64 % and a gain of
 0.14 %: at this size of total, what is left to gain comes in steps of about a tenth of one percent.
 
+**A free task.** When the directions below run short of precise ideas, one task may leave the idea to its worker:
+lower the total by one change of the worker's own choosing, anywhere in `src/`. It is cut as a probe at the floor:
+what reaches the floor is integrated, what falls short is an answer that costs its worker nothing, and the judge's
+figures are all the cutter learns from it. Its context names what was already measured and what open tasks hold, so
+that the try is spent elsewhere. One at a time: it names `src/`, so it is dealt while no other task is held.
+Everything under "Never" holds for it. (Since 23 November 2026, the architect's decision.)
+
 Nothing else is a goal. A faster or lighter program at the same total is not progress the judge can prove: no
 task asks for it. It is worth something only as room for the next model, inside a task that also lowers the total.
 
@@ -88,7 +95,8 @@ be held at once.** A new model is a new file, so models can be written side by s
 | The program's own code | the file it is in | Less code for the same compression: a smaller table computed rather than written, two models made one | at the margin; never at the cost of what a model takes off the message |
 | The frame around the program | `bee/relay/main.rs`, `bee/relay/build` | A frame without the runtime and the C library: about 1.3 MB off every total | **the architect's own work, never a task** (`bee/` is protected) |
 
-- One idea per task; the title names the file and the idea.
+- One idea per task; the title names the file and the idea. The free task ("What counts as progress") is the one
+  exception: its idea is its worker's.
 - A model's task lists its new file alone; if it needs a new field of the context, the field and that model are one
   task, which lists `src/context.rs` too.
 - First the mixer; then models, as many at once as there are workers; the refining step once two or three models
