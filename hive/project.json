@@ -50,7 +50,7 @@
   "confirm": ["sure_total_bytes"]
  },
  "cutter": {
-  "floors": {"gain_total_bytes": 0.0025},
+  "floors": {"gain_total_bytes": 0.001},
   "changes": 10,
   "open": 6,
   "context_chars": 2000
