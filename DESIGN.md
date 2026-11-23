@@ -141,6 +141,11 @@ tip's own figures on the hive's machine (`encode_seconds`, `decode_seconds` on e
 `bee/check` shows on the worker's machine. A candidate between 54 and 90 seconds was told; one refused there was not
 surprised by noise.
 
+On 23 November 2026 the tip took 54 seconds to encode, the whole of that margin, and the architect raised each phase's
+bound to 150 seconds (the margin told to tasks: 90 s). The worst case becomes `70 + 3 × (185 + 15 + 10) + 6 × (230 +
+10) + 4 × (230 + 10) + 60 = 3,160 s`, still under the 3,480 s; a judgement of an honest candidate at the heavy end
+takes about twice as long as before.
+
 **Memory:** 2,048 MB for the container; the charter says 1,600. The tip takes 47 MB, an order-3 model more 79 MB:
 the room is for many hashed models. A hosted runner has 16 GB.
 
