@@ -128,7 +128,7 @@ failure is said to be on the tip's side.
 | Docker, its runtime, an image, the launcher's or the gate's build, the gate's own setup (status 126 at the tip's first phase), the launcher's line, a status 137 without Docker's memory record, a tree that cannot be read | 2 | the machine's |
 | a build or a phase stopped by the clock with its processor time **unused** | 2 | the machine did not give it a processor. Behind the gate a phase cannot wait at all (no call that waits is let through); a build may wait on its own processes. Never a refusal: a failure to judge, which the hive answers by its own rule ([protocol.md](https://github.com/Bee-ruche/hive/blob/main/docs/protocol.md)) |
 
-**How the time bound is set, and the margin.** The manifest gives 90 seconds of processor time to each phase and
+**How the time bound is set, and the margin.** At first the manifest gave 90 seconds of processor time to each phase and
 120 to a build. On the corpus the tip takes 0.35 s to encode and 0.83 s to decode, an order-3 model more 0.8 s and
 2.3 s; the ladder's heavy end (many models, a match model, a mixer that learns) takes tens of times the tip's time.
 90 seconds leaves that room and keeps a judgement short. The worst case of a judgement, every container at its
@@ -436,7 +436,7 @@ compiler and the tip's total is measured again), so a gain stays a gain; across 
 ledger may move by those bytes. The project's build refuses another release than 1.75.
 
 **What a run costs.** A candidate's judgement: the launcher's and the gate's build, two builds and seven passes
-over the data. Worst case, every container at its clock and every step of the tip's run twice: 2,260 seconds with
+over the data. Worst case, every container at its clock and every step of the tip's run twice: about 2,460 seconds with
 this project's manifest of 21 November 2026, under 3,400 with that of 23 November (a kind that
 lets a project set bounds near the hour lets a judgement take that long: four of them fill a run's four hours of
 judging, `limits.judging_seconds`, and the next candidates wait for the next run). Expected for the baseline on a
