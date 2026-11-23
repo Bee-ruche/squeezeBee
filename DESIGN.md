@@ -142,10 +142,11 @@ tip's own figures on the hive's machine (`encode_seconds`, `decode_seconds` on e
 surprised by noise.
 
 On 23 November 2026 the tip took 54 seconds to encode, the whole of that margin, and the architect raised each phase's
-bound to 140 seconds (the margin told to tasks: 84 s). Counting the tip's own phases at their clock (the tip is given a
-quarter more processor time than a candidate, 175 s, stopped at 267 s), the worst case is `70 + 3 × (185 + 15 + 10) +
-6 × (267 + 10) + 4 × (215 + 10) + 60 = 3,322 s`, under the 3,480 s; 150 seconds would have brought it to 3,490 s,
-past them. A judgement takes the time its programs take: the bound changes only how heavy a candidate may be.
+bound to 150 seconds (the margin told to tasks: 90 s). Every phase, the tip's as a candidate's, is stopped at the
+clock of the manifest's bound (230 s); the tip is given a quarter more processor time, which is checked after it ran
+and sets no later clock. The worst case is `70 + 3 × (185 + 15 + 10) + 6 × (230 + 10) + 4 × (230 + 10) + 60 =
+3,160 s`, under the 3,480 s. A judgement takes the time its programs take: the bound changes only how heavy a
+candidate may be.
 
 **Memory:** 2,048 MB for the container; the charter says 1,600. The tip takes 47 MB, an order-3 model more 79 MB:
 the room is for many hashed models. A hosted runner has 16 GB.
@@ -436,8 +437,8 @@ compiler and the tip's total is measured again), so a gain stays a gain; across 
 ledger may move by those bytes. The project's build refuses another release than 1.75.
 
 **What a run costs.** A candidate's judgement: the launcher's and the gate's build, two builds and seven passes
-over the data. Worst case, every container at its clock and every step of the tip's run twice: about 2,460 seconds with
-this project's manifest of 21 November 2026, under 3,400 with that of 23 November (a kind that
+over the data. Worst case, every container at its clock and every step of the tip's run twice: 2,260 seconds with
+this project's manifest of 21 November 2026, 3,160 with that of 23 November (a kind that
 lets a project set bounds near the hour lets a judgement take that long: four of them fill a run's four hours of
 judging, `limits.judging_seconds`, and the next candidates wait for the next run). Expected for the baseline on a
 hosted runner: about a minute (above; not measured). The tip against itself: one build, three passes (two and six
@@ -515,7 +516,7 @@ Left to the project's lead:
    asks one percent; a stuck task is cut again at half, twice, down to a quarter of a percent (about 12 KB on the
    baseline's 4.9 MB): small enough for one more model late in the ladder, far above the tens of bytes a compiler's
    own choices move. Six open tasks: the mixer alone at first, then one model per worker.
-5. **The bounds**: 90 s of processor time a phase (140 s since 23 November 2026), 120 s a build, 2,048 MB, set from
+5. **The bounds**: 90 s of processor time a phase (150 s since 23 November 2026), 120 s a build, 2,048 MB, set from
    the corpus's measures; to confirm on a hosted runner.
 6. **The 1.3 MB of runtime and C library in every total** (27.5 % of the baseline's): live with it, or have the
    frame rewritten without the standard library before the first task (it changes every figure once, so better

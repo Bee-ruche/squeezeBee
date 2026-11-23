@@ -67,13 +67,13 @@ memories: the tally says where the tip stands.
 
 ## Time and memory: the margin a task tells its worker
 
-The bounds are in `bee/relay/project.json`: **140 seconds of processor time for each phase** on the hive's machine,
+The bounds are in `bee/relay/project.json`: **150 seconds of processor time for each phase** on the hive's machine,
 120 for a build, 2,048 MB for the container (the program's memory and the file it writes, together). The first tip
 took under a second a phase; the tip of 23 November 2026 took 54 seconds to encode, the whole of the margin the
-bound of 90 seconds then left, and the bound was raised to 140 (the architect's decision): room for the heavy end of
-the ladder, with a judgement's worst case still inside its time (under 3,400 of the 3,480 seconds). A candidate past
+bound of 90 seconds then left, and the bound was raised to 150 (the architect's decision): room for the heavy end of
+the ladder, with a judgement's worst case still inside its time (3,160 of the 3,480 seconds). A candidate past
 either bound is refused, and processor time varies by a tenth or two from one machine and one hour to the next. So
-every task's context says: **stay under six tenths of the bound**, 84 seconds a phase, scaled from the tip's own
+every task's context says: **stay under six tenths of the bound**, 90 seconds a phase, scaled from the tip's own
 figures on the hive's machine (the last accepted line's `encode_seconds` and `decode_seconds`) by what `bee/check 0`
 shows on the worker's machine before and after its change; and under 1,600 MB. A task that would need more than that
 is not cut: the bound is the architect's to move, not a task's.
