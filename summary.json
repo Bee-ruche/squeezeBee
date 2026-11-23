@@ -1,0 +1,1231 @@
+{
+ "attention": {
+  "areas": 2,
+  "dealable": 2,
+  "errors": [],
+  "errors_on": [],
+  "errors_on_left_out": 0,
+  "left": 4,
+  "often": [],
+  "often_least": 2,
+  "often_left_out": 0,
+  "open": 3,
+  "starving": false,
+  "stuck": [],
+  "stuck_left_out": 0,
+  "stuck_members": 3
+ },
+ "ended_by_hive": [],
+ "generated_at": "2026-11-23T20:20:14Z",
+ "ledger": {
+  "events_left_out": 0,
+  "lines": 87,
+  "lines_after_now": 0,
+  "repeated_lines": 0,
+  "unreadable_lines": 0
+ },
+ "map": {
+  "closed": 2,
+  "cut": 2,
+  "dealt": 1,
+  "deepest": 1,
+  "done": 30,
+  "lineages": 2,
+  "linked": true,
+  "on_closed": 0,
+  "open": 3,
+  "ready": 3,
+  "rows": [
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "open",
+    "task": "squeeze-0032",
+    "title": "src/models/: a sparse model, the bytes two and three before, skipping the last, in its own file"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "open",
+    "task": "squeeze-0033",
+    "title": "src/mixer.rs: probe, a second layer: several weight sets, a small mixer over their outputs"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "open",
+    "task": "squeeze-0035",
+    "title": "src/models/order6.rs: probe, two speeds at once, both given as predictions"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "dealt",
+    "task": "squeeze-0036",
+    "title": "src/models/repeat.rs: probe, a second index on a longer hash, following the longer match"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0001",
+    "title": "src/mixer.rs: weigh the models' predictions by what each has been worth, in the context at hand, in\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0002",
+    "title": "src/models/: a new model of order 3 in its own file"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0003",
+    "title": "src/transform.rs: rewrite the text before modelling (capitals, curly quotes and dashes) and back ex\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0004",
+    "title": "src/logistic.rs, src/coder.rs, src/frame.rs: more than twelve bits of probability where nearly sure\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [
+     {
+      "status": "done",
+      "task": "squeeze-0002"
+     }
+    ],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0005",
+    "title": "src/models/: how the order-2 model's counts adapt (a rate that slows as evidence grows)"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [
+     {
+      "status": "done",
+      "task": "squeeze-0001"
+     },
+     {
+      "status": "done",
+      "task": "squeeze-0002"
+     }
+    ],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0006",
+    "title": "src/refine.rs: correct the mixed probability by what came true in a small context"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [
+     {
+      "status": "done",
+      "task": "squeeze-0002"
+     }
+    ],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0007",
+    "title": "src/context.rs and src/models/: a hash of the word so far, and a word model that reads it"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [
+     {
+      "status": "done",
+      "task": "squeeze-0004"
+     }
+    ],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0008",
+    "title": "src/frame.rs: two passes, measure first then code with what was learnt"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 1,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "closed",
+    "task": "squeeze-0009",
+    "title": "src/models/order3.rs: how the order-3 model's counts adapt (a rate that slows as evidence grows)"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0010",
+    "title": "src/models/: a new model of order 4 (hashed) in its own file"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [
+     {
+      "status": "done",
+      "task": "squeeze-0010"
+     }
+    ],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0011",
+    "title": "src/models/: a match model, the byte that followed the longest earlier match of the last bytes"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0012",
+    "title": "src/mixer.rs: probe, choose the weight set by the bits of the byte known so far"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0013",
+    "title": "src/mixer.rs: probe, choose the weight set by the bit's place and the previous byte"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0014",
+    "title": "src/mixer.rs: probe, choose the weight set by the bit's place and by how much the models agree"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0016",
+    "title": "src/transform.rs: probe, a list of frequent words rewritten as single bytes and back exactly"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0017",
+    "title": "src/refine.rs: probe, a second refining stage in a different small context"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0018",
+    "title": "src/context.rs and src/models/: the column and the bytes of the line before, and a model of verse t\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 1,
+    "kind": "work",
+    "needs": [
+     {
+      "status": "done",
+      "task": "squeeze-0018"
+     }
+    ],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "closed",
+    "task": "squeeze-0019",
+    "title": "src/models/: a new model of order 6, hashed, in its own file"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0020",
+    "title": "src/models/order3.rs: how the order-3 model's counts adapt (a rate that slows as evidence grows, or\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "work",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0021",
+    "title": "src/mixer.rs: choose the weight set by the bits of the byte known so far"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0022",
+    "title": "src/models/order4.rs: probe, how the order-4 model's counts adapt (a rate that slows as evidence gr\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0023",
+    "title": "src/models/word.rs: probe, how the word model's counts adapt (a rate that slows as evidence grows,\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0024",
+    "title": "src/models/repeat.rs: probe, keep two earlier matches and predict from the longer"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0025",
+    "title": "src/mixer.rs: probe, two weight sets chosen in two ways, their outputs averaged"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0026",
+    "title": "src/context.rs and src/models/: a hash of the previous word, and a model of word pairs that reads it"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0028",
+    "title": "src/models/verse.rs: probe, how the verse model's counts adapt (a rate that slows as evidence grows\u2026"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0029",
+    "title": "src/context.rs and src/models/: a hash of the two words before, and a model that reads it"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0030",
+    "title": "src/: probe, a free try: lower the total by one change of your own choosing"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0031",
+    "title": "src/: probe, a free try: lower the total by one change of your own choosing, no slower"
+   },
+   {
+    "after": 0,
+    "depth": 0,
+    "folded": 0,
+    "kind": "probe",
+    "needs": [],
+    "needs_left_out": 0,
+    "parent": null,
+    "status": "done",
+    "task": "squeeze-0034",
+    "title": "src/models/pair.rs: probe, how the word-pair model's counts adapt (a rate that slows as evidence gr\u2026"
+   }
+  ],
+  "rows_left_out": 0,
+  "tasks": 36,
+  "waiting": 0
+ },
+ "measures": {
+  "judge_runs_per_integration": 1.67,
+  "time_to_answer_seconds": null,
+  "waiting": null,
+  "yield": 1.0
+ },
+ "members": [
+  {
+   "badge": "members/72140-badge.svg",
+   "card": "members/72140.svg",
+   "first_integration": "2026-11-22T04:02:37Z",
+   "id": 72140,
+   "integrations": 18,
+   "last_integration": "2026-11-23T16:55:39Z",
+   "login": "bidji29"
+  }
+ ],
+ "members_without_integration": 0,
+ "models": [
+  {
+   "acceptance_rate": null,
+   "accepted": 10,
+   "judged": null,
+   "model": null,
+   "too_few_members": true
+  },
+  {
+   "acceptance_rate": null,
+   "accepted": 6,
+   "judged": null,
+   "model": "claude-fable-5-2",
+   "too_few_members": true
+  },
+  {
+   "acceptance_rate": null,
+   "accepted": 2,
+   "judged": null,
+   "model": "claude-opus-5-5",
+   "too_few_members": true
+  }
+ ],
+ "preferences": {
+  "kept": 0,
+  "named": 0,
+  "not_kept": [],
+  "recent": []
+ },
+ "probe_answers": [
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.001,
+    "more": 1
+   },
+   "at": "2026-11-23T20:07:43Z",
+   "measures": [
+    {
+     "gain": 0.000128,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0034",
+   "title": "src/models/pair.rs: probe, how the word-pair model's counts adapt (a rate that slows as evidence gr\u2026"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.001,
+    "more": 1
+   },
+   "at": "2026-11-23T18:57:10Z",
+   "measures": [
+    {
+     "gain": 0.000376,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0031",
+   "title": "src/: probe, a free try: lower the total by one change of your own choosing, no slower"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.001,
+    "more": 1
+   },
+   "at": "2026-11-23T13:52:58Z",
+   "measures": [
+    {
+     "gain": 0.000767,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0030",
+   "title": "src/: probe, a free try: lower the total by one change of your own choosing"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.001,
+    "more": 1
+   },
+   "at": "2026-11-23T12:47:24Z",
+   "measures": [
+    {
+     "gain": 0.000204,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0028",
+   "title": "src/models/verse.rs: probe, how the verse model's counts adapt (a rate that slows as evidence grows\u2026"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.001,
+    "more": 1
+   },
+   "at": "2026-11-23T08:11:38Z",
+   "measures": [
+    {
+     "gain": 0.000988,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0025",
+   "title": "src/mixer.rs: probe, two weight sets chosen in two ways, their outputs averaged"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.001,
+    "more": 1
+   },
+   "at": "2026-11-23T03:19:15Z",
+   "measures": [
+    {
+     "gain": 0.000102,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0022",
+   "title": "src/models/order4.rs: probe, how the order-4 model's counts adapt (a rate that slows as evidence gr\u2026"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.0025,
+    "more": 1
+   },
+   "at": "2026-11-23T01:50:05Z",
+   "measures": [
+    {
+     "gain": -0.000235,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 0,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0017",
+   "title": "src/refine.rs: probe, a second refining stage in a different small context"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.0025,
+    "more": 1
+   },
+   "at": "2026-11-23T01:23:33Z",
+   "measures": [
+    {
+     "gain": 0.000747,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0016",
+   "title": "src/transform.rs: probe, a list of frequent words rewritten as single bytes and back exactly"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.0025,
+    "more": 1
+   },
+   "at": "2026-11-23T00:27:55Z",
+   "measures": [
+    {
+     "gain": 0.001082,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0012",
+   "title": "src/mixer.rs: probe, choose the weight set by the bits of the byte known so far"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.0025,
+    "more": 1
+   },
+   "at": "2026-11-23T00:03:19Z",
+   "measures": [
+    {
+     "gain": 0.001433,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0015",
+   "title": "src/models/order3.rs: probe, how the order-3 model's counts adapt (a rate that slows as evidence gr\u2026"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.0025,
+    "more": 1
+   },
+   "at": "2026-11-22T22:58:12Z",
+   "measures": [
+    {
+     "gain": 0.000111,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 1,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0014",
+   "title": "src/mixer.rs: probe, choose the weight set by the bit's place and by how much the models agree"
+  },
+  {
+   "asked": {
+    "also": [
+     "total_bytes"
+    ],
+    "max": null,
+    "metric": "total_bytes",
+    "min": 0.0025,
+    "more": 1
+   },
+   "at": "2026-11-22T22:08:12Z",
+   "measures": [
+    {
+     "gain": -0.006388,
+     "goal": true,
+     "metric": "total_bytes",
+     "sure": 0,
+     "worse": null
+    }
+   ],
+   "measures_left_out": 0,
+   "reason": "goal_not_met",
+   "task": "squeeze-0013",
+   "title": "src/mixer.rs: probe, choose the weight set by the bit's place and the previous byte"
+  }
+ ],
+ "probe_answers_left_out": 0,
+ "project": "squeeze",
+ "protocol": 1,
+ "recent": [
+  {
+   "at": "2026-11-23T16:55:39Z",
+   "card": "wins/fa8fdbe9bb258d9739774cb457df42c406d56ffa.svg",
+   "commit": "fa8fdbe9bb258d9739774cb457df42c406d56ffa",
+   "figure": {
+    "gain": 0.001457,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.001457,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/fa8fdbe9bb258d9739774cb457df42c406d56ffa.html",
+   "task": "squeeze-0029",
+   "title": "src/context.rs and src/models/: a hash of the two words before, and a model that reads it"
+  },
+  {
+   "at": "2026-11-23T15:24:31Z",
+   "card": "wins/82ee4dbcf8ce820b0ab1f67534373593ffa54980.svg",
+   "commit": "82ee4dbcf8ce820b0ab1f67534373593ffa54980",
+   "figure": {
+    "gain": 0.001131,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.001131,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/82ee4dbcf8ce820b0ab1f67534373593ffa54980.html",
+   "task": "squeeze-0027",
+   "title": "src/models/: probe, a new model of order 6, hashed, in its own file"
+  },
+  {
+   "at": "2026-11-23T12:05:28Z",
+   "card": "wins/fb351f52a86bbf5721f292dfa178e7eeb8f42c36.svg",
+   "commit": "fb351f52a86bbf5721f292dfa178e7eeb8f42c36",
+   "figure": {
+    "gain": 0.001435,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.001435,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/fb351f52a86bbf5721f292dfa178e7eeb8f42c36.html",
+   "task": "squeeze-0023",
+   "title": "src/models/word.rs: probe, how the word model's counts adapt (a rate that slows as evidence grows,\u2026"
+  },
+  {
+   "at": "2026-11-23T08:33:05Z",
+   "card": "wins/969a2d7ca0989ae127e5f4ee4ffbf60c745086af.svg",
+   "commit": "969a2d7ca0989ae127e5f4ee4ffbf60c745086af",
+   "figure": {
+    "gain": 0.002533,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.002533,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/969a2d7ca0989ae127e5f4ee4ffbf60c745086af.html",
+   "task": "squeeze-0026",
+   "title": "src/context.rs and src/models/: a hash of the previous word, and a model of word pairs that reads it"
+  },
+  {
+   "at": "2026-11-23T07:43:53Z",
+   "card": "wins/136b6eef7e97f447138923cec6b2568d19944944.svg",
+   "commit": "136b6eef7e97f447138923cec6b2568d19944944",
+   "figure": {
+    "gain": 0.001716,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.001716,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/136b6eef7e97f447138923cec6b2568d19944944.html",
+   "task": "squeeze-0024",
+   "title": "src/models/repeat.rs: probe, keep two earlier matches and predict from the longer"
+  },
+  {
+   "at": "2026-11-23T04:15:09Z",
+   "card": "wins/f35b8fe41808f520d9e3fe50deeceafed553844b.svg",
+   "commit": "f35b8fe41808f520d9e3fe50deeceafed553844b",
+   "figure": {
+    "gain": 0.013052,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.013052,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/f35b8fe41808f520d9e3fe50deeceafed553844b.html",
+   "task": "squeeze-0018",
+   "title": "src/context.rs and src/models/: the column and the bytes of the line before, and a model of verse t\u2026"
+  },
+  {
+   "at": "2026-11-23T03:53:15Z",
+   "card": "wins/096447fcd16da6d11c2bc0d8f41329d23d63f767.svg",
+   "commit": "096447fcd16da6d11c2bc0d8f41329d23d63f767",
+   "figure": {
+    "gain": 0.001895,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.001895,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/096447fcd16da6d11c2bc0d8f41329d23d63f767.html",
+   "task": "squeeze-0021",
+   "title": "src/mixer.rs: choose the weight set by the bits of the byte known so far"
+  },
+  {
+   "at": "2026-11-23T02:45:09Z",
+   "card": "wins/d9f9d9a0f1adddab0ae44620a7a99061d11bfbaa.svg",
+   "commit": "d9f9d9a0f1adddab0ae44620a7a99061d11bfbaa",
+   "figure": {
+    "gain": 0.001783,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.001783,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/d9f9d9a0f1adddab0ae44620a7a99061d11bfbaa.html",
+   "task": "squeeze-0020",
+   "title": "src/models/order3.rs: how the order-3 model's counts adapt (a rate that slows as evidence grows, or\u2026"
+  },
+  {
+   "at": "2026-11-22T21:51:12Z",
+   "card": "wins/10bd4d18cdbde444b85e988bc2dee00d5e488d79.svg",
+   "commit": "10bd4d18cdbde444b85e988bc2dee00d5e488d79",
+   "figure": {
+    "gain": 0.007189,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.007189,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/10bd4d18cdbde444b85e988bc2dee00d5e488d79.html",
+   "task": "squeeze-0011",
+   "title": "src/models/: a match model, the byte that followed the longest earlier match of the last bytes"
+  },
+  {
+   "at": "2026-11-22T17:02:05Z",
+   "card": "wins/d6d1a51a3736e5e59d528dc47c8d58671be93e40.svg",
+   "commit": "d6d1a51a3736e5e59d528dc47c8d58671be93e40",
+   "figure": {
+    "gain": 0.0125,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.0125,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/d6d1a51a3736e5e59d528dc47c8d58671be93e40.html",
+   "task": "squeeze-0008",
+   "title": "src/frame.rs: two passes, measure first then code with what was learnt"
+  },
+  {
+   "at": "2026-11-22T16:28:25Z",
+   "card": "wins/166b69f50e5980db98844fe74417bd065e3a8130.svg",
+   "commit": "166b69f50e5980db98844fe74417bd065e3a8130",
+   "figure": {
+    "gain": 0.006147,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.006147,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/166b69f50e5980db98844fe74417bd065e3a8130.html",
+   "task": "squeeze-0006",
+   "title": "src/refine.rs: correct the mixed probability by what came true in a small context"
+  },
+  {
+   "at": "2026-11-22T16:15:42Z",
+   "card": "wins/dec0d1d7b3c80f8d0a266884a491b2da551ca38b.svg",
+   "commit": "dec0d1d7b3c80f8d0a266884a491b2da551ca38b",
+   "figure": {
+    "gain": 0.02336,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.02336,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/dec0d1d7b3c80f8d0a266884a491b2da551ca38b.html",
+   "task": "squeeze-0010",
+   "title": "src/models/: a new model of order 4 (hashed) in its own file"
+  },
+  {
+   "at": "2026-11-22T15:18:04Z",
+   "card": "wins/c476f2d7369b09df0bdbe0c5419ffe07da86fdd7.svg",
+   "commit": "c476f2d7369b09df0bdbe0c5419ffe07da86fdd7",
+   "figure": {
+    "gain": 0.01938,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.01938,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/c476f2d7369b09df0bdbe0c5419ffe07da86fdd7.html",
+   "task": "squeeze-0001",
+   "title": "src/mixer.rs: weigh the models' predictions by what each has been worth, in the context at hand, in\u2026"
+  },
+  {
+   "at": "2026-11-22T08:05:53Z",
+   "card": "wins/d4176266632706b6bb481232267261b00cedc481.svg",
+   "commit": "d4176266632706b6bb481232267261b00cedc481",
+   "figure": {
+    "gain": 0.064671,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.064671,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/d4176266632706b6bb481232267261b00cedc481.html",
+   "task": "squeeze-0007",
+   "title": "src/context.rs and src/models/: a hash of the word so far, and a word model that reads it"
+  },
+  {
+   "at": "2026-11-22T07:04:46Z",
+   "card": "wins/a1d63f011b2390888ff1cd4a409f6d39bff63032.svg",
+   "commit": "a1d63f011b2390888ff1cd4a409f6d39bff63032",
+   "figure": {
+    "gain": 0.027849,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.027849,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/a1d63f011b2390888ff1cd4a409f6d39bff63032.html",
+   "task": "squeeze-0003",
+   "title": "src/transform.rs: rewrite the text before modelling (capitals, curly quotes and dashes) and back ex\u2026"
+  },
+  {
+   "at": "2026-11-22T06:08:32Z",
+   "card": "wins/ed2df4421bca89b762ce101cd74bc70227c501b3.svg",
+   "commit": "ed2df4421bca89b762ce101cd74bc70227c501b3",
+   "figure": {
+    "gain": 0.014562,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.014562,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/ed2df4421bca89b762ce101cd74bc70227c501b3.html",
+   "task": "squeeze-0005",
+   "title": "src/models/: how the order-2 model's counts adapt (a rate that slows as evidence grows)"
+  },
+  {
+   "at": "2026-11-22T05:08:06Z",
+   "card": "wins/a8d3858fec6fb69405e172690c99935fef711fdd.svg",
+   "commit": "a8d3858fec6fb69405e172690c99935fef711fdd",
+   "figure": {
+    "gain": 0.004681,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": false,
+   "headline": {
+    "gain": 0.004681,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/a8d3858fec6fb69405e172690c99935fef711fdd.html",
+   "task": "squeeze-0004",
+   "title": "src/logistic.rs, src/coder.rs, src/frame.rs: more than twelve bits of probability where nearly sure\u2026"
+  },
+  {
+   "at": "2026-11-22T04:02:37Z",
+   "card": "wins/a4637763c646ed47b5de9d4973d228a9728526a9.svg",
+   "commit": "a4637763c646ed47b5de9d4973d228a9728526a9",
+   "figure": {
+    "gain": 0.112848,
+    "goal": true,
+    "metric": "total_bytes"
+   },
+   "first": true,
+   "headline": {
+    "gain": 0.112848,
+    "metric": "total_bytes"
+   },
+   "login": "bidji29",
+   "member_id": 72140,
+   "page": "wins/a4637763c646ed47b5de9d4973d228a9728526a9.html",
+   "task": "squeeze-0002",
+   "title": "src/models/: a new model of order 3 in its own file"
+  }
+ ],
+ "refusals": [],
+ "short_of_a_figure": [],
+ "short_of_a_figure_left_out": 0,
+ "stats_json": "agrees",
+ "tasks": {
+  "closed": 2,
+  "dealt": 1,
+  "done": 30,
+  "open": 3,
+  "total": 36
+ },
+ "totals": {
+  "accepted": 18,
+  "answered": 12,
+  "ended_by_hive": 0,
+  "integrations": 18,
+  "judge_failures": 0,
+  "judge_runs": 30,
+  "judged": 18,
+  "refused": 0,
+  "verdicts": 30
+ },
+ "trusted_base": null,
+ "week": {
+  "acceptance_rate": 1.0,
+  "accepted": 18,
+  "integrations": 18,
+  "judged": 18,
+  "members": 1,
+  "since": "2026-11-16T20:20:14Z"
+ }
+}
