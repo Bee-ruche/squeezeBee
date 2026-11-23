@@ -118,4 +118,5 @@ be held at once.** A new model is a new file, so models can be written side by s
 
 ## Publishing
 
-The cutter publishes on `main` itself; no person reads each cut before it lands. (The architect's to confirm.)
+The cutter publishes on `main` itself; no person reads each cut before it lands (the architect's decision, 23 November
+2026). It runs as the architect's scheduled task, every two hours.
