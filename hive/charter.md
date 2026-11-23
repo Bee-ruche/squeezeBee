@@ -12,10 +12,14 @@ never held it; each phase within its processor time and its memory (`bee/relay/p
 
 ## What counts as progress
 
-One task asks one thing: a total lower than the tip's by a share, **`gain_total_bytes` at least 0.01** (one percent
-fewer bytes) unless a smaller step is all an idea can give, **never below 0.0025**, and always with its proof,
-**`sure_total_bytes` at least 1**. The judge measures the tip and the candidate in the same judgement; the figure
-is exact, and a candidate that is right but no smaller meets no goal.
+One task asks one thing: a total lower than the tip's by a share, `gain_total_bytes`, always with its proof,
+**`sure_total_bytes` at least 1**. The share a task asks comes from a measure of its idea: what an accepted task or
+a probe's answer showed for it. An idea nothing has measured is a probe. **Never below 0.001** (one tenth of one
+percent fewer bytes, the project's floor). The judge measures the tip and the candidate in the same judgement; the
+figure is exact, so a step that small is still certain, and a candidate that is right but no smaller meets no goal.
+
+The floor was 0.0025 until 23 November 2026. The first probes measured ideas between a loss of 0.64 % and a gain of
+0.14 %: at this size of total, what is left to gain comes in steps of about a tenth of one percent.
 
 Nothing else is a goal. A faster or lighter program at the same total is not progress the judge can prove: no
 task asks for it. It is worth something only as room for the next model, inside a task that also lowers the total.
@@ -78,14 +82,15 @@ be held at once.** A new model is a new file, so models can be written side by s
 | Counts | the model's own file | How a context's count adapts: two speeds at once, a speed that slows as evidence grows, what was seen last | nothing |
 | The refining step | `src/refine.rs` | Correct the mixed probability by what came true in a small context | better after the mixer |
 | The scale and the coder | `src/logistic.rs`, `src/coder.rs`, `src/frame.rs` | More than twelve bits of probability where predictions are nearly sure; a shorter end of message | one task at a time: the three files change together |
-| The context | `src/context.rs`, then the models that read it | What the frame keeps for every model: a hash of the word so far, the column, the last line's bytes | a task on `src/context.rs` alone first, then the models that use what it added (`needs`) |
+| The context | `src/context.rs`, then the models that read it | What the frame keeps for every model: a hash of the word so far, the column, the last line's bytes | the new field and the first model that reads it are one task (a field alone lowers no total, and is no task); later models `needs` that task |
 | The transform | `src/transform.rs` | Rewrite the text before modelling and back: capitals (the plays' speakers' names, the headings), the curly quotes and dashes of the UTF-8, a list of frequent words | nothing |
 | The frame | `src/frame.rs` | Two passes (measure first, then code with what was learnt, the choice written in the message), a message cut in parts | one task at a time; never with a task of the scale and the coder |
 | The program's own code | the file it is in | Less code for the same compression: a smaller table computed rather than written, two models made one | at the margin; never at the cost of what a model takes off the message |
 | The frame around the program | `bee/relay/main.rs`, `bee/relay/build` | A frame without the runtime and the C library: about 1.3 MB off every total | **the architect's own work, never a task** (`bee/` is protected) |
 
 - One idea per task; the title names the file and the idea.
-- A model's task lists its new file alone; if it needs a new field of the context, that field is a task before it.
+- A model's task lists its new file alone; if it needs a new field of the context, the field and that model are one
+  task, which lists `src/context.rs` too.
 - First the mixer; then models, as many at once as there are workers; the refining step once two or three models
   are in.
 - When a direction stops paying (three members refused on tasks of it, or gains under the floor), it is left, and
@@ -95,7 +100,7 @@ be held at once.** A new model is a new file, so models can be written side by s
 
 - A task that changes anything outside `src/`: the build, the rule, the frame around the program, the manifest,
   the bounds, the corpus, the sandbox, the proofs.
-- A goal on anything but `gain_total_bytes` with its proof `sure_total_bytes`, or a gain below 0.0025.
+- A goal on anything but `gain_total_bytes` with its proof `sure_total_bytes`, or a gain below 0.001.
 - A task that asks to copy, port or adapt the code of an existing compressor, or names one as a model to follow
   line by line. Published descriptions of techniques are the only sources.
 - A task that asks for the corpus's own text to be written into the program (it is counted, and it gains nothing:
