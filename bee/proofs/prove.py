@@ -164,6 +164,17 @@ def main():
             text = f.read()
         with open(rule, "w", encoding="utf-8") as f:
             f.write(loosened(text))
+        # A program that names the standard library cannot be linked into the light frame (no standard library, no
+        # C library, its own start): the loosened tip keeps the frame as it was (bee/proofs/std-frame), linked as it
+        # was, without the light frame's link arguments and as a position-independent program.
+        lay_over(tips["loosened"], os.path.join(HERE, "std-frame"))
+        build = os.path.join(tips["loosened"], "bee", "relay", "build")
+        with open(build, encoding="utf-8") as f:
+            text = f.read()
+        if text.count(" $alone ") != 1 or text.count(" -C relocation-model=static") != 1:
+            raise SystemExit("prove: the build's text is not what this script loosens")
+        with open(build, "w", encoding="utf-8") as f:
+            f.write(text.replace(" $alone ", " ").replace(" -C relocation-model=static", ""))
 
     results, failed = {}, []
     for name in names:
