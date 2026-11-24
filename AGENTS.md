@@ -94,7 +94,7 @@ clone with no network, none of your environment variables and an empty home. The
 its guarded paths: `.git` (its history only), `.github`, the agents' instructions, `bee/`, `hive/` and the project's
 other guarded files are read-only ([bee/README.md](bee/README.md), "The sandbox"). The launcher shows the
 machine's own `/usr`, and the check needs the judge's own toolchain there: `/usr/bin/rustc` 1.75 as Ubuntu 24.04
-packages it, `/usr/bin/cc` (gcc) with the static C library, and `/usr/bin/python3`. On a Linux machine whose `/usr`
+packages it, `/usr/bin/cc` (gcc, the linker: the program links no C library), and `/usr/bin/python3`. On a Linux machine whose `/usr`
 holds them:
 
 ```bash

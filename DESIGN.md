@@ -23,7 +23,8 @@ processors and 2 GB).*
   expected.
 - **The corpus.** 10,000,000 bytes of public-domain books (Shakespeare's works, three novels of Dickens), in the
   project's tree, pinned by SHA-256, made by a written rule from files whose own fingerprints are recorded. The
-  baseline's total on it: 4,890,484 bytes, of which 27.5 % is the program as built.
+  baseline's total on it: 4,890,484 bytes, of which 27.5 % was the program as built with the frame of then; with
+  the light frame (25 November 2026, below), 3,567,636, of which the program 23,624.
 - **What four independent reads found** (Sonnet agents given the code and the threats, not this note). The first:
   the phases' containers held the whole build image, a free dictionary. Fixed: phases run in an empty image. The
   second: the two phases still shared host folders (the launcher's, the program's), and nothing kept a program that
@@ -37,8 +38,8 @@ processors and 2 GB).*
   kind as it went into the hive: a step of the tip's that fails in a way its bytes do not decide is now run once
   more before the failure is said to be on the tip's side. Smaller things, fixed or said (below).
 - **What is open.** What only the project's own judgements on a hosted runner can show (times, what its kernel ends
-  at a memory bound); a lighter frame around the program (1.3 MB of every total is the
-  language's runtime and the C library today).
+  at a memory bound). (The lighter frame around the program, which this note left open, was written on 25 November
+  2026: the program no longer holds the language's runtime and the C library, 1.3 MB of every total until then.)
 
 ## Why not the common judge
 
@@ -86,7 +87,7 @@ failure is said to be on the tip's side.
 | Decision | Reason |
 | --- | --- |
 | **The count is the built executable's length**, not a packing of the source | The counted bytes are the very bytes both phases run, read by the host from the build's output and written again for the phases. There is no step between « counted » and « acts »: bytes in the source, in a second file, in a file's name, in a constant computed when the program is built, reach a phase only by being in that file. A first version counted the source through a fixed coder of the judge's own; it needed a coder kept identical for ever, priced comments, and the toy showed it could be cheaper than a weak program's own coding, so that moving data into the source « gained ». The executable has none of this: comments and names are free, and a byte costs a byte wherever it is put. It is also what the Hutter Prize counts. Its costs: figures are tied to one compiler, and the compiler's own choices move the size by hundreds of bytes: far under any task's floor. |
-| **A phase runs in an empty image, and the program is linked statically** | The independent read's main finding. A phase used to run in the build's image: a gigabyte of compiler, libraries and licence texts that any program able to open a file could prime a model with, for nothing. Now the kind makes the image phases run in, and it holds one link and nothing else: no system, no shell, no library. What the program needs it brings, in the file that is counted. The cost is plain: the C library is now inside the count. This project's `run` went from 387,480 bytes (dynamic) to **1,346,472** (static), the same for the tip and a candidate. A frame written without the standard library would bring it to tens of kilobytes (open, below). |
+| **A phase runs in an empty image, and the program is linked statically** | The independent read's main finding. A phase used to run in the build's image: a gigabyte of compiler, libraries and licence texts that any program able to open a file could prime a model with, for nothing. Now the kind makes the image phases run in, and it holds one link and nothing else: no system, no shell, no library. What the program needs it brings, in the file that is counted. The cost is plain: the C library is now inside the count. This project's `run` went from 387,480 bytes (dynamic) to **1,346,472** (static), the same for the tip and a candidate. A frame written without the standard library would bring it to tens of kilobytes (done on 25 November 2026: 23,624 bytes). |
 | **Each phase has a memory file system of its own**, holding its own copies of the launcher, the gate, the program and its one input, unmounted when the phase ends | The second read's blocking finding. Before, the launcher's folder and the program's folder were the same host folders, mounted read-only into both phases: nothing could be written there, but a program able to make system calls could leave state in them that the next phase reads back (names looked up that do not exist, which pages are in memory). Now no folder of the host is ever given to two containers, as the common judge's `container.Execution` already does for its runs. (`Execution` itself is not reused: it builds its own launcher from `chrono.c` against the image's libraries and plans the harness's command; the kind needs a static launcher, the gate and its own command, so it copies the pattern, not the function.) |
 | **A gate shuts every system call a phase does not need** (`gate.c`, the kind's own file; the hive's `chrono.c` is not changed) | A program is native code whatever its source promises: the language's rule and the compiler stand only as far as the compiler is sound, and it has known holes. So the gate, a program of the kind's, opens the phase's two files as descriptors 3 and 4, installs a seccomp filter that lets through reading and writing descriptors it holds, its own memory and signals, and ending, and only then starts the program (one execve, told by arguments that point into a page at a drawn address, which no longer exists once the program replaces the gate). Every other call (open, stat of any kind, `/proc`, `/sys`, `mincore`, the clock and sleeping as calls, other processes, threads, sockets, new descriptors) is refused before it is carried out. A filter installed by the launcher, rather than a profile given to Docker, keeps the hive's container code as it is and lets the two files be opened before the door shuts. The frames read descriptor 3 and write descriptor 4. |
 | **Both phases are one program** (`run encode`, `run decode`) | One build, one file counted. Code only the encoder needs is counted too. The prize counts the decompressor alone; allowing a free encoder would need a second build that is given other files, and a rule on what may be in them. Left open. |
@@ -190,9 +191,10 @@ the clock stops it at 185 s, and a build stopped there with its processor time u
   machine, and a worker told at once which line it may not write.
 - **The frame around the program** (`bee/relay/main.rs`) is the only code that touches a file, and is the
   project's own: it reads descriptor 3 and writes descriptor 4, which the judge's gate opened before it started
-  (or a shell, in `bee/check`). It is what brings the language's runtime and the C library into the count (1,346,472 bytes). A
-  frame written without them (its own entry point, four system calls, an allocator) would weigh tens of kilobytes.
-  It is the architect's to write, not a task: about 1.3 MB off every total, the tip's and the candidate's alike.
+  (or a shell, in `bee/check`). Until 25 November 2026 it brought the language's runtime and the C library into the
+  count (1,346,472 bytes at the first tip). Since then it holds neither (its own entry point, a handful of system
+  calls, an allocator, its own copies): the first tip's program weighs 23,624 bytes, the frame some 19 kB of
+  every program. It is the architect's, not a task's.
 
 ## Threats, how each is closed, and its proof
 
@@ -367,6 +369,7 @@ development runner. Processor times are `chrono.c`'s.
 | message | 3,544,012 (2.84 bits a character) | 2,987,868 |
 | program, as built | 1,346,472 | 1,346,472 |
 | **total** | **4,890,484** | **4,334,340** (gain 11.37 %, proof 1) |
+| with the light frame (25 November 2026): program / total | 23,624 / 3,567,636 | 24,968 / 3,012,836 |
 | encode / decode (processor seconds) | 0.35 / 0.83 | 0.76 / 2.32 |
 | memory, encode / decode | 47 MB / 47 MB | 79 MB / 79 MB |
 
@@ -380,9 +383,10 @@ runner's 2 GB. No size measured on the stand-in says anything about the corpus.
 
 - Decoding is slower than encoding (the processor cannot look ahead at bits it has not decoded): the decode bound
   is the one a heavy program meets first.
-- The program is 27.5 % of the baseline's total, and nearly all of it is the language's runtime and the C library,
-  linked statically into the project's frame: the charter makes the program's own size a direction (the frame,
-  the architect's own; the compressor's code, a task's at the margin).
+- The program was 27.5 % of the baseline's total, and nearly all of it the language's runtime and the C library,
+  linked statically into the project's frame. The frame, the architect's own direction, was made light on 25
+  November 2026: the program is now 0.7 % of the baseline's total, most of it the frame (some 19 kB); at the tip
+  of 25 November 2026, with nine models, it is 2.4 %, most of it the compressor's code, a task's at the margin.
 - `bee/check`, in the sandbox's image, gives the judge's own figures on the same bytes.
 - **On a hosted runner** (not measured): one core of a shared machine is plausibly as fast as this one or up to
   twice slower. The baseline's judgement would be seven passes of one to five seconds, three builds of about ten
@@ -520,7 +524,8 @@ Left to the project's lead:
    the corpus's measures; to confirm on a hosted runner.
 6. **The 1.3 MB of runtime and C library in every total** (27.5 % of the baseline's): live with it, or have the
    frame rewritten without the standard library before the first task (it changes every figure once, so better
-   before than after). The charter makes it the architect's own direction.
+   before than after). The charter makes it the architect's own direction. **Done on 25 November 2026**, after the
+   first tasks (PR 17): the tip's total went from 3,502,705 to 2,176,609, its message unchanged to the byte.
 7. **Who reads a cut**: the charter says the cutter publishes on `main` itself, as the first pilot's does.
 8. **Who is invited**: one account today (`members.only` in `hive/project.json`), and when the project opens to more.
 
@@ -530,7 +535,6 @@ Left to the project's lead:
   processor time. (The kind's own tests ran there, with the hive's: the gate, the time-stamp counter, `sudo -n mount`
   for the memory file systems, `docker import` for the empty image.)
 - An encoder that is not counted (as the prize allows): a second build.
-- A frame without the standard library.
 - `hive.py outline` itself was not run as a command (it asks the project's repository on GitHub, which did not
   exist yet); its function `outline_of` read every file of `src/`.
 - The compiler's soundness hole was reasoned about, not tried (and will not be, here: see "Not closed").

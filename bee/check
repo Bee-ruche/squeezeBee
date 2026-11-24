@@ -13,10 +13,11 @@
 # /usr/bin:/bin from the start, as the build's is: rustc, cc (with the assembler and the linker gcc calls through the
 # PATH) and python3 are those of /usr/bin, whatever another folder of the caller's PATH holds (a machine's
 # /usr/local/bin, which comes first on the launcher's). Then /usr/bin/rustc must be 1.75 (the judge's is Ubuntu
-# 24.04's), /usr/bin/cc must name the static C library it links into the program by an absolute path that is a file,
-# and /usr/bin/python3 must be there for the project's rule. Another compiler would build what the judge's refuses
-# (a later release's language) and weigh the program otherwise. What this test does not establish (gcc's and the C
-# library's own versions, among others) is in bee/README.md, "The sandbox".
+# 24.04's), /usr/bin/cc (gcc, the linker rustc calls) must be there, and /usr/bin/python3 for the project's rule.
+# No C library is asked for: the frame holds none, and the program is linked against nothing but itself
+# (bee/relay/build). Another compiler would build what the judge's refuses (a later release's language) and weigh the
+# program otherwise. What this test does not establish (gcc's and the linker's own versions, among others) is in
+# bee/README.md, "The sandbox".
 set -euo pipefail
 PATH=/usr/bin:/bin
 export PATH
@@ -35,15 +36,7 @@ else
     *) missing+=("/usr/bin/rustc is ${compiler:-not a compiler that answers}, where the judge's is rustc 1.75") ;;
   esac
 fi
-if [ ! -x /usr/bin/cc ]; then
-  missing+=("no /usr/bin/cc, the linker rustc calls (gcc)")
-else
-  libc="$(/usr/bin/cc -print-file-name=libc.a 2>/dev/null || true)"
-  case "$libc" in
-    /*) [ -f "$libc" ] || missing+=("no static C library ($libc), which the judge links into the program") ;;
-    *) missing+=("no static C library (libc.a: gcc knows none), which the judge links into the program") ;;
-  esac
-fi
+[ -x /usr/bin/cc ] || missing+=("no /usr/bin/cc, the linker rustc calls (gcc)")
 [ -x /usr/bin/python3 ] || missing+=("no /usr/bin/python3, which runs the project's rule")
 if [ ${#missing[@]} -gt 0 ]; then
   printf 'check: %s\n' "${missing[@]}" >&2

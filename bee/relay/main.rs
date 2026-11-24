@@ -11,14 +11,16 @@
 //! - the process's start (`_start`, below): it aligns the stack, reads the arguments the kernel left on it, and
 //!   calls `start`; nothing else is set up, since nothing here needs threads, thread-local storage or environment;
 //! - the system calls, by the instruction itself (`syscall`). The ones made, and nothing else: read, write,
-//!   rt_sigaction (SIGPIPE ignored, as `std` does before `main`), mmap, munmap, mremap, exit_group. All are among
-//!   those the judge's gate lets through (`tools/judge/gate.c` in Bee-ruche/hive);
+//!   rt_sigaction (SIGPIPE ignored, as `std` does before `main`), mmap, munmap, mremap, exit_group, and getpid,
+//!   gettid and tgkill (SIGABRT to itself, when memory could not be had). All are among those the judge's gate lets
+//!   through (`tools/judge/gate.c` in Bee-ruche/hive);
 //! - the memory allocator (`Heap`), on mmap, munmap and mremap;
 //! - memcpy, memmove, memset, memcmp and bcmp, which the compiler calls for copies and comparisons;
-//! - what a panic does: a short fixed line on descriptor 2, and the exit status 101.
+//! - what a panic does: one line on descriptor 2 (where the program panicked, and why), then the exit status 101;
+//!   or, when the panic comes from memory that could not be had, SIGABRT, as a C library's abort().
 //!
 //! Exit status: 0; 2 the usage; 3 descriptor 3 could not be read; 4 descriptor 4 could not be written; 101 the
-//! program panicked, or memory could not be had. Nothing is written on descriptor 2 but one short fixed line, and
+//! program panicked; ended by SIGABRT: memory could not be had. Nothing is written on descriptor 2 but one line, and
 //! only on those errors.
 //!
 //! The build links it with `-nostartfiles -nostdlib -static`, as a position-dependent program: nothing relocates it,
@@ -167,9 +169,44 @@ fn exit(status: usize) -> ! {
     }
 }
 
+/// A line written into a buffer on the stack (nothing is allocated): what does not fit is dropped.
+struct Line {
+    bytes: [u8; 480],
+    length: usize,
+}
+
+impl core::fmt::Write for Line {
+    fn write_str(&mut self, text: &str) -> core::fmt::Result {
+        let room = self.bytes.len() - 1 - self.length; // (one byte kept for the line feed)
+        let taken = core::cmp::min(room, text.len());
+        self.bytes[self.length..self.length + taken].copy_from_slice(&text.as_bytes()[..taken]);
+        self.length += taken;
+        Ok(())
+    }
+}
+
+/// A panic: « run: panicked at <file>:<line>:<column>: <why> » on descriptor 2 (the judge quotes the start of it in
+/// its reason), then the end. When the last request for memory was refused, the panic is the allocator's (the
+/// library's handler panics on a refused request): then the process ends by SIGABRT, as a C library's abort() would,
+/// which the judge reads as a signal, not as the program's own answer. Otherwise the exit status is 101.
 #[panic_handler]
-fn panicked(_: &PanicInfo) -> ! {
-    say(b"run: the program panicked or ran out of memory\n");
+fn panicked(info: &PanicInfo) -> ! {
+    let mut line = Line { bytes: [0; 480], length: 0 };
+    let _ = core::fmt::write(&mut line, format_args!("run: {}", info));
+    // One line: the message's own line breaks become spaces.
+    for byte in line.bytes[..line.length].iter_mut() {
+        if *byte == b'\n' {
+            *byte = b' ';
+        }
+    }
+    line.bytes[line.length] = b'\n';
+    say(&line.bytes[..line.length + 1]);
+    if unsafe { (*HEAP.0.get()).refused } {
+        unsafe {
+            let (process, thread) = (syscall1(GETPID, 0), syscall1(GETTID, 0));
+            syscall3(TGKILL, process as usize, thread as usize, SIGABRT);
+        }
+    }
     exit(101)
 }
 
@@ -186,9 +223,13 @@ const MMAP: usize = 9;
 const MUNMAP: usize = 11;
 const RT_SIGACTION: usize = 13;
 const MREMAP: usize = 25;
+const GETPID: usize = 39;
+const GETTID: usize = 186;
 const EXIT_GROUP: usize = 231;
+const TGKILL: usize = 234;
 
 const EINTR: isize = 4;
+const SIGABRT: usize = 6;
 const SIGPIPE: usize = 13;
 const SIG_IGN: usize = 1;
 const PROT_READ_WRITE: usize = 0x1 | 0x2;
@@ -275,6 +316,7 @@ struct State {
     kept: [(*mut u8, usize); KEPT], // freed large mappings, (address, length), the length 0 when empty
     kept_bytes: usize,
     next_kept: usize,
+    refused: bool, // the last request for memory was answered with null
 }
 
 struct Heap(UnsafeCell<State>);
@@ -290,6 +332,7 @@ static HEAP: Heap = Heap(UnsafeCell::new(State {
     kept: [(ptr::null_mut(), 0); KEPT],
     kept_bytes: 0,
     next_kept: 0,
+    refused: false,
 }));
 
 /// The small size class of a request, or None for a large one.
@@ -426,18 +469,27 @@ impl State {
     }
 }
 
+impl Heap {
+    /// What a request is answered, noted: whether the last request was refused (see the panic handler).
+    unsafe fn answered(&self, block: *mut u8) -> *mut u8 {
+        (*self.0.get()).refused = block.is_null();
+        block
+    }
+}
+
 unsafe impl GlobalAlloc for Heap {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let state = &mut *self.0.get();
-        match class(layout.size(), layout.align()) {
+        let block = match class(layout.size(), layout.align()) {
             Some(class) => state.small(class),
             None => state.large(layout.size(), layout.align(), false),
-        }
+        };
+        self.answered(block)
     }
 
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
         let state = &mut *self.0.get();
-        match class(layout.size(), layout.align()) {
+        let block = match class(layout.size(), layout.align()) {
             Some(class) => {
                 let block = state.small(class);
                 if !block.is_null() {
@@ -447,7 +499,8 @@ unsafe impl GlobalAlloc for Heap {
             }
             // A new mapping is zeros already; a kept one is cleared.
             None => state.large(layout.size(), layout.align(), true),
-        }
+        };
+        self.answered(block)
     }
 
     unsafe fn dealloc(&self, at: *mut u8, layout: Layout) {
@@ -461,14 +514,14 @@ unsafe impl GlobalAlloc for Heap {
     unsafe fn realloc(&self, at: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
         let align = layout.align();
         match (class(layout.size(), align), class(new_size, align)) {
-            (Some(old), Some(new)) if old == new => return at,
+            (Some(old), Some(new)) if old == new => return self.answered(at),
             (None, None) if align <= PAGE => {
                 let (old, new) = (pages(layout.size()), pages(new_size));
                 if old == new {
-                    return at;
+                    return self.answered(at);
                 }
                 let moved = syscall6(MREMAP, at as usize, old, new, MREMAP_MAYMOVE, 0, 0);
-                return if moved < 0 { ptr::null_mut() } else { moved as *mut u8 };
+                return self.answered(if moved < 0 { ptr::null_mut() } else { moved as *mut u8 });
             }
             _ => {}
         }
@@ -484,35 +537,143 @@ unsafe impl GlobalAlloc for Heap {
 
 // ---- What the compiler calls for copies and comparisons -----------------------------------------------------------
 //
-// Copies and fills are one instruction each (`rep movsb`, `rep stosb`, which the processor runs fast for long
-// lengths): the compiler sees no loop in them that it could turn back into a call. The direction flag is clear on
-// entry to any function (the calling convention says so) and is left clear.
+// Every copy and fill is instructions written here (`asm!`): the compiler sees no loop of its own in them that it
+// could turn back into a call. Long forward copies and fills are one instruction (`rep movsb`, `rep stosb`, which
+// the processor runs fast for long lengths); short ones, under SHORT bytes, go by words of eight bytes then bytes,
+// which costs less than that instruction's start; a backward move (`memmove` into a later part of its own source) goes
+// by four words, then words, then bytes, from the end. The direction flag is clear on entry to any function (the
+// calling convention says so) and is never set here.
+
+const SHORT: usize = 64;
+
+/// Forwards, eight bytes then one at a time; each word is read before it is written, so this is right for two places
+/// apart and for `to` before `from`.
+#[inline(always)]
+unsafe fn forward(to: *mut u8, from: *const u8, length: usize) {
+    asm!(
+        "2:",
+        "cmp {n}, 8",
+        "jb 3f",
+        "mov {w}, qword ptr [{s}]",
+        "mov qword ptr [{d}], {w}",
+        "add {s}, 8",
+        "add {d}, 8",
+        "sub {n}, 8",
+        "jmp 2b",
+        "3:",
+        "test {n}, {n}",
+        "jz 4f",
+        "mov {w:l}, byte ptr [{s}]",
+        "mov byte ptr [{d}], {w:l}",
+        "inc {s}",
+        "inc {d}",
+        "dec {n}",
+        "jmp 3b",
+        "4:",
+        n = inout(reg) length => _, s = inout(reg) from => _, d = inout(reg) to => _, w = out(reg) _,
+        options(nostack),
+    );
+}
+
+/// Backwards from the end, thirty-two bytes (all four words read before any is written), then eight, then one at a
+/// time: right for `to` after `from` whatever the overlap.
+#[inline(always)]
+unsafe fn backward(to: *mut u8, from: *const u8, length: usize) {
+    asm!(
+        "2:",
+        "cmp {n}, 32",
+        "jb 3f",
+        "sub {n}, 32",
+        "mov {a}, qword ptr [{s} + {n} + 24]",
+        "mov {b}, qword ptr [{s} + {n} + 16]",
+        "mov {c}, qword ptr [{s} + {n} + 8]",
+        "mov {e}, qword ptr [{s} + {n}]",
+        "mov qword ptr [{d} + {n} + 24], {a}",
+        "mov qword ptr [{d} + {n} + 16], {b}",
+        "mov qword ptr [{d} + {n} + 8], {c}",
+        "mov qword ptr [{d} + {n}], {e}",
+        "jmp 2b",
+        "3:",
+        "cmp {n}, 8",
+        "jb 4f",
+        "sub {n}, 8",
+        "mov {a}, qword ptr [{s} + {n}]",
+        "mov qword ptr [{d} + {n}], {a}",
+        "jmp 3b",
+        "4:",
+        "test {n}, {n}",
+        "jz 5f",
+        "dec {n}",
+        "mov {a:l}, byte ptr [{s} + {n}]",
+        "mov byte ptr [{d} + {n}], {a:l}",
+        "jmp 4b",
+        "5:",
+        n = inout(reg) length => _, s = in(reg) from, d = in(reg) to,
+        a = out(reg) _, b = out(reg) _, c = out(reg) _, e = out(reg) _,
+        options(nostack),
+    );
+}
+
+/// The long forward copy: one instruction.
+#[inline(always)]
+unsafe fn forward_long(to: *mut u8, from: *const u8, length: usize) {
+    asm!("rep movsb", inout("rcx") length => _, inout("rdi") to => _, inout("rsi") from => _,
+         options(nostack, preserves_flags));
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn memcpy(to: *mut u8, from: *const u8, length: usize) -> *mut u8 {
-    asm!("rep movsb", inout("rcx") length => _, inout("rdi") to => _, inout("rsi") from => _,
-         options(nostack, preserves_flags));
+    if length < SHORT {
+        forward(to, from, length);
+    } else {
+        forward_long(to, from, length);
+    }
     to
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn memmove(to: *mut u8, from: *const u8, length: usize) -> *mut u8 {
     if (to as usize).wrapping_sub(from as usize) >= length {
-        // `to` before `from`, or the two apart: forwards, byte after byte as the instruction is defined, is right.
-        asm!("rep movsb", inout("rcx") length => _, inout("rdi") to => _, inout("rsi") from => _,
-             options(nostack, preserves_flags));
+        // `to` before `from`, or the two apart: forwards is right (`rep movsb` is defined byte after byte).
+        if length < SHORT {
+            forward(to, from, length);
+        } else {
+            forward_long(to, from, length);
+        }
     } else {
-        // `to` inside the source, after its start: backwards, from the last byte.
-        asm!("std", "rep movsb", "cld", inout("rcx") length => _, inout("rdi") to.add(length - 1) => _,
-             inout("rsi") from.add(length - 1) => _, options(nostack));
+        // `to` inside the source, after its start: from the end.
+        backward(to, from, length);
     }
     to
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn memset(to: *mut u8, byte: i32, length: usize) -> *mut u8 {
-    asm!("rep stosb", inout("rcx") length => _, inout("rdi") to => _, in("al") byte as u8,
-         options(nostack, preserves_flags));
+    if length < SHORT {
+        let word = (byte as u8 as u64).wrapping_mul(0x0101_0101_0101_0101);
+        asm!(
+            "2:",
+            "cmp {n}, 8",
+            "jb 3f",
+            "mov qword ptr [{d}], {w}",
+            "add {d}, 8",
+            "sub {n}, 8",
+            "jmp 2b",
+            "3:",
+            "test {n}, {n}",
+            "jz 4f",
+            "mov byte ptr [{d}], {w:l}",
+            "inc {d}",
+            "dec {n}",
+            "jmp 3b",
+            "4:",
+            n = inout(reg) length => _, d = inout(reg) to => _, w = in(reg) word,
+            options(nostack),
+        );
+    } else {
+        asm!("rep stosb", inout("rcx") length => _, inout("rdi") to => _, in("al") byte as u8,
+             options(nostack, preserves_flags));
+    }
     to
 }
 
