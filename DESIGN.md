@@ -395,9 +395,12 @@ peak memory 952 MB for all three:
 | light, copies byte-wise (2426feb) | 44.39 / 35.00 | 44.71 / 30.99 |
 | light, copies by words | 43.87 / 35.44 | 44.31 / 35.49 |
 
-The three give the same message (SHA-256 `ab1df338…18b5b1`). The copies by words change nothing measurable at the
-tip, whose program moves little memory; the spread between rounds (another container ran on the machine during part
-of the second) is larger than any difference between the frames.
+The three give the same message (SHA-256 `ab1df338…18b5b1`). Between the frames there is no difference beyond the
+run-to-run spread, which here is large: from one round to the other the same frame's times move by up to 17 %
+(another container ran on the machine during part of the second round), and in that second round the two light
+frames encode 15 to 17 % slower than the old one, where in the first they were within 1.5 % of it. The tip's program
+moves little memory, so its copies weigh little either way. Telling 5 % apart would take more rounds on a quiet
+machine.
 
 At ten times the size, on a stand-in (`bee/local/standin.py`: words of the hive's own files strung again by seeded
 chance, 100,000,000 bytes, SHA-256 `fe1c3a91…3c82409e`), the same programs take 3.70 / 8.41 s and 7.96 / 25.33 s

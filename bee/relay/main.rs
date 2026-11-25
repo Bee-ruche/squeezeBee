@@ -188,7 +188,7 @@ impl core::fmt::Write for Line {
 
 static PANICKED: AtomicBool = AtomicBool::new(false);
 
-/// A panic:« run: panicked at <file>:<line>:<column>: <why> » on descriptor 2 (the judge quotes the start of it in
+/// A panic: « run: panicked at <file>:<line>:<column>: <why> » on descriptor 2 (the judge quotes the start of it in
 /// its reason), then the end. When the last request for memory was refused, the panic is the allocator's (the
 /// library's handler panics on a refused request): then the process ends by SIGABRT, as a C library's abort() would,
 /// which the judge reads as a signal, not as the program's own answer. Otherwise the exit status is 101.

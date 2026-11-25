@@ -43,7 +43,8 @@ refining step and the transform), with the light frame around the program (PR 17
 | The program, as built | 53,272 | 2.4 % |
 | **The total** | **2,176,737** | |
 
-Each phase: 37.8 s of processor time to encode, 29.7 s to decode, 952 MB. The same tip with the frame of
+Each phase: 37.8 s of processor time to encode, 29.7 s to decode, 952 MB, in one run of the judge (on this machine
+the same program's times move by up to a sixth from one run to the next; DESIGN.md, "What was measured"). The same tip with the frame of
 before held the same message and a program of 1,379,240 bytes: 3,502,705 in all. (At the project's first tip, 21
 November 2026, with one order-2 model: 4,890,484, of which the program 1,346,472, 27.5 %.)
 
