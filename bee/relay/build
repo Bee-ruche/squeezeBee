@@ -4,8 +4,14 @@
 # program as /out/run.  (BEE_SRC and BEE_OUT name other folders than /src and /out: bee/check gives them, the judge
 # does not.)
 #
-# The program is linked statically (crt-static): a phase runs in a container that holds no library and no file of
-# any system, so everything the program needs is in the one file that is counted.
+# The program is linked statically, and against nothing but itself: a phase runs in a container that holds no
+# library and no file of any system, so everything the program needs is in the one file that is counted. The frame
+# (main.rs) holds neither the standard library nor the C library: it has its own start, its own system calls, its
+# own allocator and its own memcpy, memmove, memset and memcmp, so the program is linked with -nostartfiles
+# -nostdlib -static, as a position-dependent program (relocation-model=static), which nothing has to relocate when
+# it starts. Three more options only lay the file out tighter, and change no instruction: code and read-only data
+# share pages (-z noseparate-code), no build id is written (--build-id=none), and no page is set aside to be made
+# read-only after relocation (-z norelro), since nothing is relocated. Together they take some 7.8 kB off the file.
 #
 # What is built: the program's files as one crate without the standard library and without unsafe code, whose root
 # rules.py writes once it has held each file to the project's rule; then the project's own frame (main.rs), which
@@ -32,9 +38,10 @@ rm -rf "$work"
 mkdir -p "$work"
 export TMPDIR="$work"
 python3 "$src/bee/relay/rules.py" "$src/src" "$work/lib.rs"
-common="--edition 2021 -C opt-level=3 -C codegen-units=1 -C panic=abort -C debuginfo=0 -C strip=symbols -C target-feature=+crt-static -C overflow-checks=off -C debug-assertions=off"
+common="--edition 2021 -C opt-level=3 -C codegen-units=1 -C panic=abort -C debuginfo=0 -C strip=symbols -C target-feature=+crt-static -C relocation-model=static -C overflow-checks=off -C debug-assertions=off"
+alone="-C link-arg=-nostartfiles -C link-arg=-nostdlib -C link-arg=-static -C link-arg=-Wl,-z,noseparate-code -C link-arg=-Wl,--build-id=none -C link-arg=-Wl,-z,norelro"
 # shellcheck disable=SC2086
 rustc $common -F unsafe_code --crate-type rlib --crate-name program -o "$work/libprogram.rlib" "$work/lib.rs"
 # shellcheck disable=SC2086
-rustc $common --extern program="$work/libprogram.rlib" -o "$out/run" "$src/bee/relay/main.rs"
+rustc $common $alone --extern program="$work/libprogram.rlib" -o "$out/run" "$src/bee/relay/main.rs"
 rm -rf "$work"

@@ -1,0 +1,95 @@
+#!/bin/bash
+# The proof that the light frame changes no byte of the message. Run IN THE SANDBOX (bee/README.md), as bee/check is:
+#
+#   bee/proofs/same-message [bytes [file]]      bytes: how much of the file (default 0: all of it)
+#                                               file:  the data (default: the project's corpus, bee/corpus/data)
+#
+# It builds the program three times, with the judge's own build script (bee/relay/build), the project's rule and the
+# same src/:
+#   light   the frame of this tree (bee/relay/main.rs): no standard library, no C library;
+#   before  the frame as it was (bee/proofs/std-frame: the standard library and the C library), built as it was: the
+#           build without $alone and without -C relocation-model=static, as bee/proofs/prove.py builds its loosened
+#           tip;
+#   mutant  the light frame with its message XORed with 0x55 on the way out and back in: its round trip is right,
+#           its message is not the same. It shows that the comparison below can fail.
+# It encodes the data with each, decodes each message, and compares the messages' SHA-256. Exit status 0 only if
+# every round trip gives the data back, light's message is before's to the byte, and mutant's is not; 1 otherwise;
+# 2 for a usage error; 3 if the build cannot be taken back to the frame as it was (its text changed); 124 or 137
+# if a build, an encoding or a decoding outlives its timeout. It also checks that `before` is the frame with the
+# standard library and `light` the frame without it, by their weight: over 1,000,000 bytes and under 100,000.
+#
+# It needs what bee/check needs and, for `before` alone, the static C library (libc6-dev), which the sandbox's image
+# and the judge's hold. It writes only in a folder of its own under /tmp, removed when it ends. On the whole corpus
+# it takes three encodings and three decodings of the tip's program; each step has a timeout (a build 300 s, an
+# encoding or a decoding 600 s: the judge gives 120 and 150).
+set -euo pipefail
+PATH=/usr/bin:/bin
+export PATH
+root="$(cd "$(dirname "$0")/../.." && pwd)"
+bytes="${1:-0}"
+data="${2:-$root/bee/corpus/data}"
+[ -f "$data" ] || { echo "same-message: no data at $data" >&2; exit 2; }
+w="$(mktemp -d /tmp/bee-same-message.XXXXXX)"
+trap 'rm -rf "$w"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+for frame in light before mutant; do
+  mkdir -p "$w/$frame/bee" "$w/$frame/out"
+  cp -r "$root/bee/relay" "$w/$frame/bee/"
+  cp -r "$root/src" "$w/$frame/src"
+done
+cp "$root/bee/proofs/std-frame/bee/relay/main.rs" "$w/before/bee/relay/main.rs"
+python3 - "$w/before/bee/relay/build" "$w/mutant/bee/relay/main.rs" <<'PYTHON' || exit 3
+import sys
+
+build, frame = sys.argv[1], sys.argv[2]
+with open(build, encoding="utf-8") as f:
+    text = f.read()
+if text.count(" $alone ") != 1 or text.count(" -C relocation-model=static") != 1:
+    sys.exit("same-message: the build's text is not what this script takes back to the frame as it was")
+with open(build, "w", encoding="utf-8") as f:
+    f.write(text.replace(" $alone ", " ").replace(" -C relocation-model=static", ""))
+line = "    let output = if encoding { program::encode(&input) } else { program::decode(&input) };\n"
+with open(frame, encoding="utf-8") as f:
+    text = f.read()
+if text.count(line) != 1:
+    sys.exit("same-message: the frame's text is not what this script makes its mutant of")
+mutant = ("    let mut input = input;\n"
+          "    if !encoding { for byte in input.iter_mut() { *byte ^= 0x55; } }\n"
+          "    let mut output = if encoding { program::encode(&input) } else { program::decode(&input) };\n"
+          "    if encoding { for byte in output.iter_mut() { *byte ^= 0x55; } }\n")
+with open(frame, "w", encoding="utf-8") as f:
+    f.write(text.replace(line, mutant))
+PYTHON
+if [ "$bytes" = 0 ]; then cp "$data" "$w/data"; else head -c "$bytes" "$data" > "$w/data"; fi
+echo "data_bytes $(wc -c < "$w/data") sha256 $(sha256sum < "$w/data" | cut -c1-64)"
+failed=0
+for frame in light before mutant; do
+  BEE_SRC="$w/$frame" BEE_OUT="$w/$frame/out" timeout -s KILL 300 sh "$w/$frame/bee/relay/build"
+  timeout -s KILL 600 "$w/$frame/out/run" encode 3<"$w/data" 4>"$w/$frame/message"
+  timeout -s KILL 600 "$w/$frame/out/run" decode 3<"$w/$frame/message" 4>"$w/$frame/back"
+  if cmp -s "$w/data" "$w/$frame/back"; then back="the same bytes"; else back="NOT the same bytes"; failed=1; fi
+  printf '%-6s program_bytes %s message_bytes %s message_sha256 %s round trip: %s\n' "$frame" \
+    "$(wc -c < "$w/$frame/out/run")" "$(wc -c < "$w/$frame/message")" "$(sha256sum < "$w/$frame/message" | cut -c1-64)" "$back"
+done
+# The two frames are the ones claimed: the standard library and the C library weigh over a megabyte, the light
+# frame and the program together less than a tenth of that.
+if [ "$(wc -c < "$w/before/out/run")" -gt 1000000 ] && [ "$(wc -c < "$w/light/out/run")" -lt 100000 ]; then
+  echo "before holds the standard library (over 1,000,000 bytes), light does not (under 100,000)"
+else
+  echo "before or light is not the frame claimed: before must weigh over 1,000,000 bytes, light under 100,000" >&2
+  failed=1
+fi
+if cmp -s "$w/light/message" "$w/before/message"; then
+  echo "light and before: the same message, byte for byte"
+else
+  echo "light and before: NOT the same message" >&2
+  failed=1
+fi
+if cmp -s "$w/mutant/message" "$w/before/message"; then
+  echo "mutant and before: the same message: the comparison failed to see a frame that changes it" >&2
+  failed=1
+else
+  echo "mutant and before: not the same message, as it must be (the comparison sees a frame that changes it)"
+fi
+exit $failed

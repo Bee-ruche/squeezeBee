@@ -81,6 +81,18 @@ bee/local/run.sh <hive> sh /project/bee/local/assemble.sh python3 -B /project/be
   --encode-seconds 30 --decode-seconds 30 --memory-mb 512
 ```
 
+`proofs/same-message`, in the sandbox, builds the program with the light frame and with the frame as it was
+(`proofs/std-frame`), and ends with 0 only if the two give the corpus the same message, to the byte (and a frame that
+changes the message, made to check the check, does not):
+
+```bash
+bee/proofs/same-message        # the whole corpus: three encodings and three decodings
+```
+
+A change of the frame or of the build reaches candidates cut before it too: the hive merges each candidate onto the tip
+as it is before the judge sees it, so every program is built with the tip's frame (DESIGN.md, « A candidate cut from a
+tip with the old frame »).
+
 ## The sandbox
 
 Two forms, whose commands AGENTS.md gives ("Commands"): the image (`sandbox/Dockerfile`) where the machine has
@@ -162,19 +174,19 @@ What it does not guarantee:
 - **It shows the machine's own `/usr`**, whatever compiler is there: what `bee/check` does about it is below.
 
 **The toolchain without Docker.** The judge builds the program in its image: Ubuntu 24.04 (by its fingerprint),
-that release's rustc 1.75 for x86-64 (`x86_64-unknown-linux-gnu`), linked by gcc, statically, against the release's
-own C library (`libc.a`, of `libc6-dev`), with python3 for the project's rule; nothing is fetched while it builds.
-`program_bytes` is the length of that file, so it depends on the compiler's release, on gcc and on the C library
-(most of the frame's 1.3 MB is theirs). `message_bytes` depends on the program's arithmetic alone (whole numbers and
+that release's rustc 1.75 for x86-64 (`x86_64-unknown-linux-gnu`), linked by gcc, statically and against nothing
+but itself (the frame, `relay/main.rs`, holds neither the standard library nor the C library), with python3 for the
+project's rule; nothing is fetched while it builds. `program_bytes` is the length of that file, so it depends on the
+compiler's release and on gcc's linker (until 25 November 2026 the frame also held the C library, some 1.3 MB of
+the file; the whole program is now some 48 kB). `message_bytes` depends on the program's arithmetic alone (whole numbers and
 the four operations of floating point), the same on any compiler and any processor. The launcher shows whatever
 the machine's `/usr` holds, so **`bee/check` checks with the judge's toolchain or not at all**. It names the judge's
 tools by where they are: its PATH, and the build's (`bee/relay/build`), is `/usr/bin:/bin` from the start, so
 `rustc`, `cc` (with the assembler and the linker gcc calls through the PATH) and `python3` are those of `/usr/bin`,
 whatever another folder of the caller's PATH holds (a machine's `/usr/local/bin`, first on the launcher's PATH, is
 neither built with nor a reason to stop). Before it builds, it stops (exit status 3), says why and says stop,
-unless `/usr/bin/rustc` says it is 1.75, `/usr/bin/cc` names its static C library by an absolute path that is a
-file (a bare name would be looked for in the current folder, the work tree, which a command writes), and
-`/usr/bin/python3` is there. It does not go on with another compiler and a warning: a later release builds what the
+unless `/usr/bin/rustc` says it is 1.75, `/usr/bin/cc` is there, and `/usr/bin/python3` is there. (It asks for no
+C library: the program links none.) It does not go on with another compiler and a warning: a later release builds what the
 judge's refuses (a part of the language stabilised after 1.75), which the judge answers with a refusal the
 worker's deal pays for, and `program_bytes` is part of the very total a task's goal is on. The one difference it
 lets through is the processor's: on ARM the compiler is the same release, so what builds there builds at the judge;
@@ -182,7 +194,7 @@ it then says that `program_bytes` is not the judge's (`message_bytes` is).
 
 **What that test does not establish**: that `/usr/bin/rustc` is Ubuntu's own build of 1.75 (any 1.75 put there
 passes; Ubuntu's says « built from a source tarball », which is what was seen, on one machine, and the test does not
-rest on it), nor gcc's version or the C library's, on which `program_bytes` depends as well. Where they are not the
+rest on it), nor gcc's version or its linker's, on which `program_bytes` depends as well. Where they are not the
 judge's, `program_bytes` may differ: by some bytes for a later update of the same release (as it may on the judge's
 machine: DESIGN.md, "The compiler is not pinned"), by more for another system. `message_bytes` does not.
 
@@ -190,12 +202,13 @@ machine: DESIGN.md, "The compiler is not pinned"), by more for another system. `
 process make user namespaces (if not, the launcher says so and stops), which system it is, what its `/usr` holds.
 On a Linux machine whose `/usr` holds the judge's toolchain, a worker checks; anywhere else, **a worker without
 Docker and without this toolchain cannot check, and stops.** (For the person who prepares such a machine, not for
-an agent working on it: on Ubuntu 24.04 that toolchain is the release's own packages `rustc`, `gcc`, `libc6-dev` and
-`python3-minimal`, which whoever owns the machine may put there before a session starts.) For it to be otherwise, the project and the hive would need a toolchain that such a machine can fetch and
+an agent working on it: on Ubuntu 24.04 that toolchain is the release's own packages `rustc`, `gcc` and `python3-minimal`,
+which whoever owns the machine may put there before a session starts; `libc6-dev`, which the judge's image also holds,
+is no longer needed: `bee/sandbox/test_check.sh` takes its `libc.a` away, and the check still runs.) For it to be otherwise, the project and the hive would need a toolchain that such a machine can fetch and
 hold to a fingerprint, and that the judge builds with too: for instance rustc 1.75.0 from the Rust project's own
-release archives, pinned by SHA-256 in the hive's image and in `bee/check`, and a C library that comes with it
-(Rust's musl target carries its own) or none to speak of (a frame without the standard library, the architect's
-own direction). That changes the hive's image and this project's build: not made here.
+release archives, pinned by SHA-256 in the hive's image and in `bee/check`. The C library is no longer part of the
+question: since 25 November 2026 the frame holds none, and the program links nothing but itself. A pinned compiler
+changes the hive's image: not made here.
 
 **Tried** (22 November 2026), in a throwaway container of the judge's Ubuntu 24.04 whose `/usr` holds the judge's
 toolchain, with git and python3 (kernel 6.18, util-linux 2.39.3, git 2.43), without network, with Docker's
@@ -224,6 +237,9 @@ Docker:
   file `libc.a` at the root of the work tree, without `/usr/bin/cc` (a working one in `/usr/local/bin`), and without
   `/usr/bin/python3` (a working one in `/usr/local/bin`); with everything put back it ran again, with the same
   figures, and left the clone as it was.
+- 25 November 2026, with the light frame (the program links no C library): `test_check.sh` 11 passed, in a
+  container of the same image; t5 and t6 now take the static C library away (t6 with a file `libc.a` left at the
+  root of the work tree) and the check runs, with t0's figures.
 - The Docker form, as AGENTS.md gives it, in the image of `sandbox/Dockerfile`: `bee/check` ran (as uid 1000), each
   of its read-only paths refused a write, and a file of the program took one.
 - Not tried: a cloud session (whether it lets a process make user namespaces, what its `/usr` holds), ARM.

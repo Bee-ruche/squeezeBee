@@ -67,10 +67,11 @@ put_aside /usr/bin/rustc; mkdir -p /root/.cargo-bee-test/bin; ln -s /usr/bin/rus
 home_rustc=$(PATH=/root/.cargo-bee-test/bin:$PATH rustc --version 2>&1)
 verdict t4a "(t4's setting) outside, the caller's PATH finds a working rustc 1.75 in a home folder, and none is in /usr" "$(case "$home_rustc" in "rustc 1.75."*) [ ! -e /usr/bin/rustc ]; echo $?;; *) echo 1;; esac)" "$home_rustc"
 stops t4 "that rustc is not the judge's: no /usr/bin/rustc, stop" "no /usr/bin/rustc" "/root/.cargo-bee-test/bin:$PATH"
+# The program is linked against no C library (the light frame, bee/relay/main.rs): without one, the check runs.
 put_aside "$libc"
-stops t5 "no static C library: stop" "no static C library"
+runs t5 "no static C library: the program links none, so the check runs, t0's figures"
 put_aside "$libc"; echo "a libc.a a candidate left" >"$repo/libc.a"; made+=("$repo/libc.a")
-stops t6 "no static C library, and a file named libc.a at the root of the work tree (gcc's bare answer would name it): stop" "gcc knows none"
+runs t6 "no static C library, and a file named libc.a at the root of the work tree: nothing reads it, the check runs, t0's figures"
 put_aside /usr/bin/cc; stand_in /usr/local/bin/cc 'exec /usr/bin/cc.bee-test-aside "$@"'
 stops t7 "no /usr/bin/cc, a working one in /usr/local/bin: stop" "no /usr/bin/cc"
 real_python=$(readlink -f /usr/bin/python3); put_aside /usr/bin/python3; stand_in /usr/local/bin/python3 "exec $real_python \"\$@\""
