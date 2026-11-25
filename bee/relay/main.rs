@@ -40,6 +40,7 @@ use core::arch::{asm, global_asm};
 use core::cell::UnsafeCell;
 use core::panic::PanicInfo;
 use core::ptr;
+use core::sync::atomic::{AtomicBool, Ordering};
 
 // The start. The kernel leaves the stack pointer on the argument count, followed by the arguments' addresses; it
 // is aligned to 16 bytes at entry, and aligned again here all the same, so that `start` is entered as any function
@@ -185,12 +186,20 @@ impl core::fmt::Write for Line {
     }
 }
 
-/// A panic: « run: panicked at <file>:<line>:<column>: <why> » on descriptor 2 (the judge quotes the start of it in
+static PANICKED: AtomicBool = AtomicBool::new(false);
+
+/// A panic:« run: panicked at <file>:<line>:<column>: <why> » on descriptor 2 (the judge quotes the start of it in
 /// its reason), then the end. When the last request for memory was refused, the panic is the allocator's (the
 /// library's handler panics on a refused request): then the process ends by SIGABRT, as a C library's abort() would,
 /// which the judge reads as a signal, not as the program's own answer. Otherwise the exit status is 101.
 #[panic_handler]
 fn panicked(info: &PanicInfo) -> ! {
+    // A panic while the line is written (a Display of the program's that panics itself) would come back here, and
+    // again, until the stack ran out: the second time, a fixed line and the end.
+    if PANICKED.swap(true, Ordering::Relaxed) {
+        say(b"run: panicked again while saying why\n");
+        ended();
+    }
     let mut line = Line { bytes: [0; 480], length: 0 };
     let _ = core::fmt::write(&mut line, format_args!("run: {}", info));
     // One line: the message's own line breaks become spaces.
@@ -201,6 +210,11 @@ fn panicked(info: &PanicInfo) -> ! {
     }
     line.bytes[line.length] = b'\n';
     say(&line.bytes[..line.length + 1]);
+    ended()
+}
+
+/// The end of a panic: SIGABRT when the last request for memory was refused, the status 101 otherwise.
+fn ended() -> ! {
     if unsafe { (*HEAP.0.get()).refused } {
         unsafe {
             let (process, thread) = (syscall1(GETPID, 0), syscall1(GETTID, 0));

@@ -24,6 +24,12 @@ is offered to anyone: these are texts written to be refused.
 the C library), which `prove.py` puts in the loosened tip alone, since a program that names the standard library
 cannot be linked into the light frame. The loosened tip's build links it as it was then.
 
+`same-message` is no candidate either: a script run in the sandbox, as `bee/check` is, that proves the light frame
+changes no byte of the message. It builds the tree's program with the light frame and with `std-frame` (built as
+`prove.py` builds the loosened tip), encodes the corpus with both, decodes both messages, and ends with 0 only if
+the two messages are the same bytes (it prints their SHA-256) and a third program, the light frame with its message XORed on the way out and
+back in (a right round trip, another message), does not. The judge's `message_bytes` alone could not show it.
+
 The toy project of the judge's kind (`tools/judge/relay_toy/` in Bee-ruche/hive, with `test_relay.py`) holds the same
 attacks written in C, where nothing stands between a program and the system, and one more: the control, a door left
 open on purpose, through which the same cheating program is taken for right.

@@ -40,10 +40,10 @@ refining step and the transform), with the light frame around the program (PR 17
 | | Bytes | Share of the total |
 | --- | --- | --- |
 | The message | 2,123,465 | 97.6 % |
-| The program, as built | 53,144 | 2.4 % |
-| **The total** | **2,176,609** | |
+| The program, as built | 53,272 | 2.4 % |
+| **The total** | **2,176,737** | |
 
-Each phase: 46.3 s of processor time to encode, 36.0 s to decode, 952 MB. The same tip with the frame of
+Each phase: 37.8 s of processor time to encode, 29.7 s to decode, 952 MB. The same tip with the frame of
 before held the same message and a program of 1,379,240 bytes: 3,502,705 in all. (At the project's first tip, 21
 November 2026, with one order-2 model: 4,890,484, of which the program 1,346,472, 27.5 %.)
 
@@ -89,7 +89,7 @@ be held at once.** A new model is a new file, so models can be written side by s
 | The transform | `src/transform.rs` | Rewrite the text before modelling and back: capitals (the plays' speakers' names, the headings), the curly quotes and dashes of the UTF-8, a list of frequent words | nothing |
 | The frame | `src/frame.rs` | Two passes (measure first, then code with what was learnt, the choice written in the message), a message cut in parts | one task at a time; never with a task of the scale and the coder |
 | The program's own code | the file it is in | Less code for the same compression: a smaller table computed rather than written, two models made one | at the margin; never at the cost of what a model takes off the message |
-| The frame around the program | `bee/relay/main.rs`, `bee/relay/build` | **Done** on 25 November 2026 (PR 17): a frame without the runtime and the C library, 1,379,240 bytes of program down to 53,144 at the tip; what is left of the frame, some 19 kB, is the same for every candidate | **the architect's own work, never a task** (`bee/` is protected) |
+| The frame around the program | `bee/relay/main.rs`, `bee/relay/build` | **Done** on 25 November 2026 (PR 17): a frame without the runtime and the C library, 1,379,240 bytes of program down to 53,272 at the tip; what is left of the frame, some 19 kB, is the same for every candidate | **the architect's own work, never a task** (`bee/` is protected) |
 
 - One idea per task; the title names the file and the idea. The free task ("What counts as progress") is the one
   exception: its idea is its worker's.

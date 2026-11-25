@@ -81,6 +81,18 @@ bee/local/run.sh <hive> sh /project/bee/local/assemble.sh python3 -B /project/be
   --encode-seconds 30 --decode-seconds 30 --memory-mb 512
 ```
 
+`proofs/same-message`, in the sandbox, builds the program with the light frame and with the frame as it was
+(`proofs/std-frame`), and ends with 0 only if the two give the corpus the same message, to the byte (and a frame that
+changes the message, made to check the check, does not):
+
+```bash
+bee/proofs/same-message        # the whole corpus: three encodings and three decodings
+```
+
+A change of the frame or of the build reaches candidates cut before it too: the hive merges each candidate onto the tip
+as it is before the judge sees it, so every program is built with the tip's frame (DESIGN.md, « A candidate cut from a
+tip with the old frame »).
+
 ## The sandbox
 
 Two forms, whose commands AGENTS.md gives ("Commands"): the image (`sandbox/Dockerfile`) where the machine has
